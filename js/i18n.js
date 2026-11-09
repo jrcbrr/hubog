@@ -86,6 +86,7 @@ const en = {
   reminder_note: "Hubog's notification shows while the app is open. For a reminder when Hubog is closed, add it to your calendar.",
   creatine_notif_title: 'Creatine time', creatine_notif_body: 'Take your {g} g of creatine today.',
   creatine_prompt: 'Taking creatine? Get a daily reminder and a streak on your Today screen.', set_reminder: 'Set reminder', no_thanks: 'No thanks',
+  made_by: 'Made by',
   error: 'Something went wrong',
 };
 
@@ -174,6 +175,7 @@ const tl = {
   reminder_note: 'Lumalabas ang notification ng Hubog habang bukas ang app. Para may paalala kahit sarado ang Hubog, idagdag ito sa calendar mo.',
   creatine_notif_title: 'Oras na ng creatine', creatine_notif_body: 'Inumin ang {g} g na creatine mo ngayon.',
   creatine_prompt: 'Umiinom ka ba ng creatine? Magkaroon ng araw-araw na paalala at streak sa Ngayon screen.', set_reminder: 'Mag-set ng paalala', no_thanks: 'Huwag na',
+  made_by: 'Gawa ni',
   error: 'May nagkaproblema',
 };
 

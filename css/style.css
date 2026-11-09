@@ -436,3 +436,15 @@ label.check-me { color: var(--c); }
 .switch-row input:checked::after { transform: translateX(20px); }
 .ok-line { color: var(--primary); font-weight: 600; margin: 10px 0 0; }
 .creatine-prompt { display: grid; gap: 10px; }
+
+/* credit (Today header) */
+.credit {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 12px;
+  padding: 2px 4px 12px; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.12);
+  font-size: .78rem; color: rgba(255,255,255,.72); text-align: center;
+}
+.credit-name b { color: #fff; font-family: var(--display); font-weight: 500; }
+.credit-links { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; }
+.credit a { display: inline-flex; align-items: center; gap: 5px; color: var(--mangga); text-decoration: none; padding: 4px 0; }
+.credit a .ic { width: 15px; height: 15px; }
+.credit a:hover span, .credit a:focus-visible span { text-decoration: underline; }

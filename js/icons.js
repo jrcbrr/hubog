@@ -17,6 +17,8 @@ export const ICON = {
   search: i('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>'),
   star: i('<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>'),
   play: i('<path d="M7 4.5v15l12-7.5z"/>'),
+  mail: i('<rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M4 7.5l8 6 8-6"/>'),
+  at: i('<circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/>'),
   scale: i('<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 9a5 5 0 0 1 8 0l-3 3"/>'),
 };
 export const MEAL_EMOJI = { breakfast: '☕', lunch: '🍛', dinner: '🌙', snacks: '🍌' };

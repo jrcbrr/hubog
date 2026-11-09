@@ -8,6 +8,8 @@ import { cfg as creatineCfg, takenOn, toggleTaken, creatineStreak, isDue } from 
 import { foodEmoji } from '../foods.js';
 import { ICON, MEAL_EMOJI } from '../icons.js';
 
+const CREDIT = { name: 'John Rudolph Cabrera', email: 'johnrudolph2010@gmail.com', instagram: 'jrcbrr_' };
+
 export const getTargets = st => st.profile.customTargets || st.profile.targets;
 
 export function renderToday(root, params) {
@@ -37,6 +39,13 @@ export function renderToday(root, params) {
 
   root.innerHTML = `
   <section class="leaf today-hero">
+  <div class="credit">
+    <span class="credit-name">${t('made_by')} <b>${esc(CREDIT.name)}</b></span>
+    <span class="credit-links">
+      <a href="mailto:${CREDIT.email}">${ICON.mail}<span>${esc(CREDIT.email)}</span></a>
+      <a href="https://www.instagram.com/${CREDIT.instagram}/" target="_blank" rel="noopener">${ICON.at}<span>${esc(CREDIT.instagram)}</span></a>
+    </span>
+  </div>
   <header class="day-nav">
     <a class="icon-btn" href="#/today?date=${store.shiftDay(date, -1)}" aria-label="${t('prev_day')}">${ICON.chevL}</a>
     <div class="center"><b>${isToday ? t('today') : dateLabel(date)}</b>${strk ? `<small class="streak">${ICON.flame} ${strk} ${t('day_streak')}</small>` : ''}</div>
