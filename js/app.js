@@ -4,6 +4,7 @@ import { t, initLang } from './i18n.js';
 import { applyTheme } from './theme.js';
 import { requestPersistentStorage } from './backup.js';
 import { ICON } from './icons.js';
+import { startReminderLoop } from './creatine.js';
 import { renderOnboarding } from './views/onboarding.js';
 import { renderToday } from './views/today.js';
 import { renderAdd } from './views/add.js';
@@ -62,6 +63,7 @@ requestPersistentStorage();
 window.addEventListener('hashchange', route);
 window.addEventListener('hubog:lang', route);
 route();
+startReminderLoop({ title: t('creatine_notif_title'), body: g => t('creatine_notif_body', { g }) });
 
 // Offline support
 if ('serviceWorker' in navigator && location.protocol === 'https:') {

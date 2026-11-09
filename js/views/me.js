@@ -6,6 +6,7 @@ import { applyTheme } from '../theme.js';
 import { foodFormSheet } from './add.js';
 import { saveBackup, restoreFromFile } from '../backup.js';
 import { foodEmoji } from '../foods.js';
+import { cfg as creatineCfg, setCfg, enableNotifications, notifySupported, calendarFile } from '../creatine.js';
 
 export function renderMe(root) {
   const st = store.get();
@@ -13,6 +14,7 @@ export function renderMe(root) {
   const auto = p.targets;
   const cur = p.customTargets || auto;
   const mine = st.customFoods.filter(f => !f.hidden);
+  const cr = creatineCfg(st);
 
   root.innerHTML = `
   <header class="page-head"><h2>${t('me')}</h2></header>
@@ -45,6 +47,21 @@ export function renderMe(root) {
     <label>${t('language')}<select data-lang><option value="en" ${getLang() === 'en' ? 'selected' : ''}>English</option><option value="tl" ${getLang() === 'tl' ? 'selected' : ''}>Tagalog</option></select></label>
     <label>${t('theme')}<select data-theme>${['auto', 'light', 'dark'].map(v => `<option value="${v}" ${st.settings.theme === v ? 'selected' : ''}>${t('theme_' + v)}</option>`).join('')}</select></label>
     <label>${t('water_goal')} (ml)<input data-water type="number" min="500" step="250" value="${st.settings.waterGoalMl}"></label>
+  </section>
+
+  <section class="card" id="supplements">
+    <h3>${t('creatine_reminder')}</h3>
+    <p class="muted small">${t('creatine_info')}</p>
+    <label class="switch-row"><span>${t('creatine_track')}</span><input type="checkbox" role="switch" data-cr-on ${cr.on ? 'checked' : ''}></label>
+    ${cr.on ? `<div class="grid2 mt">
+      <label>${t('dose_g')}<input data-cr-dose type="number" min="1" max="20" step="0.5" inputmode="decimal" value="${cr.doseG}"></label>
+      <label>${t('remind_at')}<input data-cr-time type="time" value="${cr.time}"></label>
+    </div>
+    ${notifySupported() ? (Notification.permission === 'granted'
+      ? `<p class="small ok-line">✓ ${t('notif_on')}</p>`
+      : `<button class="btn block" data-cr-notify>${t('notif_enable')}</button>`) : ''}
+    <button class="btn ghost block" data-cr-cal>${t('add_calendar')}</button>
+    <p class="muted small mt">${t('reminder_note')}</p>` : ''}
   </section>
 
   <section class="card">
@@ -82,6 +99,22 @@ export function renderMe(root) {
   root.querySelector('[data-auto]')?.addEventListener('click', () => {
     store.update(s => { s.profile.customTargets = null; s.profile.targets = targets(s.profile); });
     toast(t('saved')); renderMe(root);
+  });
+  root.querySelector('[data-cr-on]').onchange = e => { setCfg({ on: e.target.checked }); renderMe(root); document.getElementById('supplements')?.scrollIntoView({ block: 'start' }); };
+  root.querySelector('[data-cr-dose]')?.addEventListener('change', e => { setCfg({ doseG: Math.min(20, Math.max(1, num(e.target.value, 5))) }); toast(t('saved')); });
+  root.querySelector('[data-cr-time]')?.addEventListener('change', e => { if (e.target.value) { setCfg({ time: e.target.value }); toast(t('saved')); } });
+  root.querySelector('[data-cr-notify]')?.addEventListener('click', async () => {
+    const r = await enableNotifications();
+    toast(r === 'granted' ? t('notif_on') : t('notif_blocked'));
+    renderMe(root);
+  });
+  root.querySelector('[data-cr-cal]')?.addEventListener('click', () => {
+    const file = calendarFile(creatineCfg(), { title: t('creatine_notif_title'), body: g => t('creatine_notif_body', { g }) });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file); a.download = file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+    toast(t('calendar_saved'));
   });
   root.querySelector('[data-lang]').onchange = e => { setLang(e.target.value); renderMe(root); };
   root.querySelector('[data-theme]').onchange = e => { store.update(s => { s.settings.theme = e.target.value; }); applyTheme(); };

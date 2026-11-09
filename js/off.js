@@ -24,11 +24,20 @@ export function fromOFF(p) {
   };
 }
 
+/**
+ * Look up a barcode. Returns { food } when nutrition is known, { partial: { name } } when the product
+ * exists but has no nutrition facts yet (common for Philippine products), or null when not found.
+ */
 export async function lookupBarcode(code) {
   const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${FIELDS}`);
-  if (!res.ok) return null;
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('lookup failed ' + res.status);
   const data = await res.json();
-  return data.status === 1 ? fromOFF(data.product) : null;
+  if (data.status !== 1 || !data.product) return null;
+  const food = fromOFF(data.product);
+  if (food) return { food };
+  const p = data.product;
+  return { partial: { name: [p.product_name, p.brands?.split(',')[0]].filter(Boolean).join(' — ') } };
 }
 
 export async function searchOFF(query, signal) {

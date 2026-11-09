@@ -70,3 +70,20 @@ js/views/*.js      screens
 - Hubog gives estimates, not medical advice.
 - Packaged food data © Open Food Facts contributors, ODbL.
 - Poppins font © The Poppins Project Authors, SIL Open Font License 1.1 (see `fonts/OFL.txt`).
+
+## Restaurants
+
+Jollibee, McDonald's, KFC, Wendy's, Burger King, Chowking, Mang Inasal, Greenwich, Shakey's and Starbucks, in `js/restaurants.js`.
+Items marked `us` use the chain's published **US** nutrition facts (Philippine portions can differ). Items marked `est` are estimates,
+because those chains (or those PH-only items) have no published nutrition data. The app shows estimates with "≈".
+
+## How label scanning works (and how well)
+
+1. The photo is shrunk to 1600 px and read with Tesseract.js (on the phone, nothing is uploaded).
+2. If the result is incomplete or the numbers don't add up (kcal ≈ 4·protein + 4·carbs + 9·fat), the photo is cleaned up
+   (grain removal + local thresholding, `js/imageprep.js`) and read again. The more believable result wins.
+3. Common OCR slips are repaired with the same calorie check: a lost decimal point (6.6 g read as 66) and "g" read as "9".
+4. Numbers that still look doubtful are highlighted in yellow next to your photo so you can check them before saving.
+
+Measured on test labels (US, Philippine FDA and EU layouts) with the same OCR engine: clean labels 100%,
+normal phone photos 90%, very blurry/grainy/tilted photos about 15%. See `tests/fixtures/label-ocr.json`.

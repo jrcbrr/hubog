@@ -15,6 +15,7 @@ const defaults = () => ({
   sessions: [],   // workout sessions
   activePlan: null,
   activeSession: null,
+  creatineLog: {},
 });
 
 let state = load();

@@ -26,7 +26,7 @@ export function openFoodSheet(food, { date = store.todayKey(), meal = defaultMea
     <div class="sheet-food">
       <span class="tile" aria-hidden="true">${foodEmoji(food)}</span>
       <div class="grow"><h3 class="sheet-title">${esc(food.name)}</h3>
-      <p class="muted small">${esc(food.serving || '')}${food.source === 'builtin' ? ', ' + t('approx') : ''}${food.source === 'off' ? ', Open Food Facts' : ''}</p></div>
+      <p class="muted small">${esc(food.serving || '')}${food.source === 'builtin' ? ', ' + t('approx') : ''}${food.source === 'off' ? ', Open Food Facts' : ''}${food.source === 'restaurant' ? ', ' + (food.official ? t('official_us') : t('approx')) : ''}</p></div>
       ${food.id && !entry ? `<button class="icon-btn fav ${isFav ? 'on' : ''}" data-fav aria-label="${t('favorite')}" aria-pressed="${isFav}">${ICON.star}</button>` : ''}
     </div>
     <div class="nutri-preview" data-preview></div>

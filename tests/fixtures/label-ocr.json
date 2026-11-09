@@ -1,0 +1,152 @@
+{
+ "us_snack_L0.jpg": {
+  "truth": {
+   "kcal": 250,
+   "protein": 5,
+   "carbs": 31,
+   "fat": 12
+  },
+  "plain": "Nutrition Facts\n8 servings per container\nServing size 1 pack (55g)\nAmount per serving\nCalories 250\nTotal Fat12g 15%\nSaturated Fat5g 25%\n\nTrans Fat 0g\n\nCholesterol Omg 0%\nSodium 860mg 37%\n\nTotal Carbohydrate 31g 11%\nDietary Fiber 1g 4%\n\nTotal Sugars 2g\n\nProtein 5g\n",
+  "cleaned": "Nutrition Facts\n8 servings per container\nServing size 1 pack (55g)\nAmount per serving\nCalories 250\nTotal Fat 12g 15%\nSaturated FatSg 25%\n\nTrans Fat 0g\n\nCholesterol Omg 0%\nSodium 860mg 37%\n\nTotal Carbohydrate 31g 11%\nDietary Fiber 1g 4%\n\nTotal Sugars 2g\n\nProtein 5g\n"
+ },
+ "us_snack_L1.jpg": {
+  "truth": {
+   "kcal": 250,
+   "protein": 5,
+   "carbs": 31,
+   "fat": 12
+  },
+  "plain": "| Nutrition Facts\n\n| \u20188 servings per container\u2019\nSeiving size 1 pack (559).\n\u2014\u2014\u2014\u2014_\u2014 0\nCalories 250 .\nmans\nSaturated Fat 5g- 25%\nTrans Fat0g ; :\nCholesterol Omg, 0%\nSodium 860mg. 37% :\nTotal Carbohydrate 31g 11% \u201c\nDietary Fiber 1g. 4% eee\nTotal Sugars 2g ao\nProtein 5g - :\n",
+  "cleaned": ":| Nutrition Facts \\\n2 8 servings per container |\n\u201c|| Serving size 1 pack (559) H\n\u2014_\u2014_\u2014_\u2014_\u2014___\u2014_\u2014_\u2014_\u2014_\u2014_\u2014___ |\n; Amount per serving ne\n| Calories 250 I\n\u2014\u2014e\u2014e\u2014eoeoroeoo |}\n\u201cTT! Total Fat 129 15%\n{ Saturated Fat 5g 25% .\n4] trans Fat og \u2018\nj Cholesterol Omg 0%\n4| Sodium 860mg 37%\nTotal Carbohydrate 31g 11%\nOielary Fiber 1g 496\nTotal Sugars 2g e\n!) Protein 5g\n"
+ },
+ "us_snack_L2.jpg": {
+  "truth": {
+   "kcal": 250,
+   "protein": 5,
+   "carbs": 31,
+   "fat": 12
+  },
+  "plain": "| ee = oe\n| Nutritic Facts. eee |\nlcaiones 250.\n\u2014- IZ\n| ooh pe |\nDietary Fiber ig: 4%. : : eee.\n- a Pee ts\n: Fotal. Sugars 29 : E : e oo\noe ee oa oS\n",
+  "cleaned": "| Nutrition Facts oe\n25 sermegs per container |e\n\"| serving size 1 pack (589) 7 .\n- | Calories 250 po\n, Tot Fat 12g 18% : :\n2 | Senaated Fat 39 2596 i:\n\u00b0 Trans Fat 0g : . ic\noe Cholesterol Omg OF b ;\n, Sodhm 860mg 37% Po\n- * | Total Carbonydrate 319 us \u2018 |\n_ \u201c1 owtary Fiber ig. #0 : .\noo 1 Youal Sugars 29 a |\n= anal\n"
+ },
+ "ph_noodles_L0.jpg": {
+  "truth": {
+   "kcal": 290,
+   "protein": 6,
+   "carbs": 39,
+   "fat": 12
+  },
+  "plain": "NUTRITION FACTS\nServing Size: 1 pack (60g)\nServings per Pack: 1\nAmount per Serving\nEnergy, kcal 290\nTotal Fat, g 12\nSaturated Fat,g 6\nCholesterol, mg ie}\nSodium, mg 980\nTotal Carbohydrate,g 39\nSugar, g 4\nProtein, g 6\n",
+  "cleaned": "NUTRITION FACTS\nServing Size 1 pack (60g)\nServings per Pack 1\nAmount per Serving\nEnergy, kcal 290\nTotal Fat, g 12\nSaturated Fat.g 6\nCholesterol, mg ie}\nSodium, mg 980\nTotal Carbohydrate,g 39\nSugar. g 4\nProtein, g 6\n"
+ },
+ "ph_noodles_L1.jpg": {
+  "truth": {
+   "kcal": 290,
+   "protein": 6,
+   "carbs": 39,
+   "fat": 12
+  },
+  "plain": "| NUTRITION FACTS ee\n| Serving Size: 1 pack (609):\nOS\nAmount per Serving\nEnergy, kcal 290\nTotal Fat,g 12\nSaturated Fat,g 6\nCholesterol, mg. -9\nSodium, mg 980 :\nTotal Carbohydrate, g 39\nSugar, g 4\nProtein, g \u201c6 :\n",
+  "cleaned": "4 NUTRITION FACTS \u2018\n4 Serving Size: 1 pack (60g)\n5\n\u201c| amount per Serving f\ni Energy, kcal 200 .\nTotal Fat, g 2 \u2018\nA] saturated Fat.g 6 }\n+) Cholesterol. mg = 0 |\n\u201c| | Sodium, mg 380\n4) Total Carbohydrate. g 39 |\nSugar. 9 4 }\n1 Protein, 9 6 .\na\n"
+ },
+ "ph_noodles_L2.jpg": {
+  "truth": {
+   "kcal": 290,
+   "protein": 6,
+   "carbs": 39,
+   "fat": 12
+  },
+  "plain": "Ae ee\n[aceon Pear age oe\nPm 6 eo Pee ae\nPor ww =: BTS,\nRa : i eae\nSigang og ee\nee 8 ee Boe\nre ee i Be oe\n",
+  "cleaned": "oP NUT RITION FACTS | Z .\n. : Serving size 1 pack (Og) : 7 %\n. Semings per Pack } l |\na] Energy, tow 2 ;\n[me h\nOg Smumed fag a i .\n\u201c4 Cholesterol mg \u00b0 ;\na oe ff\n< Total C. 9 39. - I\ns, 4 Protein. 9 6 . L\n. 4, \u00b0 ero Rae aero he a if .\n| \u2018\\ | - ra\n"
+ },
+ "eu_biscuit_L0.jpg": {
+  "truth": {
+   "kcal": 150,
+   "protein": 2.1,
+   "carbs": 20.4,
+   "fat": 6.6
+  },
+  "plain": "NUTRITION INFORMATION\nServings per package: 10\nServing size: 30 g\nooo]\nPer serving Per 100g\nEnergy 628k) 2093k)\n150 kcal 500 kcal\nProtein 2.1g 70g\nFat 66g 22g\n-saturates3.0g 10g\nCarbohydrate 20.4g 68g\n-sugars 7.59 259\nSodium 120mg 400mg\n",
+  "cleaned": "NUTRITION INFORMATION\nServings per package\u2019 10\n\nServing size 30g\nooo)\n\nPer serving Per 100g\nEnergy 628k) 2093k)\n150 kcal 500 kcal\n\nProtein 21g 70g\n\nFat 66g 22g\n\n- saturates 309 109\n\nCarbohydrate 204g 689\n\n-sugarss 7.59 259\n\nSodium 120mg 400mg\n"
+ },
+ "eu_biscuit_L1.jpg": {
+  "truth": {
+   "kcal": 150,
+   "protein": 2.1,
+   "carbs": 20.4,
+   "fat": 6.6
+  },
+  "plain": "NUTRITION INFORMATION :\n_ Servings per package: 10 _\nF Serving size: 36 g :\n! kann\nEnergy - -628kJ 2093 kJ\n-150.kcal- 500-kcat\nProtein\u2019 .2.1g\u00b0.-7.0 g\nFat. 6.69 - 22g\n+ Saturates3.0g \u00b0 10. g\nCarbohydrate 20.4 g. 68g\n\u201cSugars \u201c75g 25g - :\nSodium \". 120mg. 400 mg\n",
+  "cleaned": "hee tl ne en\n| NUTRITION INFORMATION :\n. i Servings per package: 10 |\n\u201c| Serving size: 30 g i\n\ni Per serving Per 1009 t\n5 Energy 628k) 2093 kJ\n\\ 150 kcal 500 kcal\n; Proten 21g 7.0g\n\n| Fat 669 22g .\ni] -Satuawes 30g 109 |\n\n: ] Carbohydrate 20.4 g 68g -\n\u201cSugars 75g 289\n| Sodium 120mg 400 mg i\noe\n"
+ },
+ "eu_biscuit_L2.jpg": {
+  "truth": {
+   "kcal": 150,
+   "protein": 2.1,
+   "carbs": 20.4,
+   "fat": 6.6
+  },
+  "plain": "} wut Sa FO - RM. ATION N os : tt - we 4\n| serena pee pester: . ee oe .\n\u2014 i \u2014\u2014\u2014 eee\nLo aso eal soo weal, oe\npee 219 TOS nae a\npa. 869 229\u00b0 ee. ; : Ne Soeeiad\nveaneees300, 209 | ; Geet\nconanyerse 049 03 _\nage 789 28 ea\n",
+  "cleaned": "ar RIFORMATION CoM\n- gaveng wit bok) : \\\n. 3 per serving Por 1008 ; . | .\n| erage 78 REN | an\n; 2) promein 218 709 : |\n\u201clem 800 220 :\n| Vat, 3 nae\n7 4 carbobyorain 2049 ag . : v\nOk i wn 159 8 t\neel Reet wore Home po\n| . 4 a\nan aT aera rae \u2014-a\n"
+ },
+ "ph_drink_L0.jpg": {
+  "truth": {
+   "kcal": 110,
+   "protein": 0,
+   "carbs": 27,
+   "fat": 0
+  },
+  "plain": "Nutrition Facts\nServing Size 1 bottle (250mL)\nAmount Per Serving\nCalories 110\n\nTotal Fat Og\n\nSodium 35mg\n\nTotal Carbohydrate 27g\nSugars 27g\n\nProtein 0g\n",
+  "cleaned": "Nutrition Facts\nServing Size 1 bottle (250mL)\nAmount Per Serving\nCalories 110\n\nTotal Fat 0g\n\nSodium 35mg\n\nTotal Carbohydrate 27g\nSugars 27g\n\nProtein Og\n"
+ },
+ "ph_drink_L1.jpg": {
+  "truth": {
+   "kcal": 110,
+   "protein": 0,
+   "carbs": 27,
+   "fat": 0
+  },
+  "plain": "Nutrition Facts\nServing Size 1 bottle (250mL)\n\n- Amount Per Serving\nCalories 110 :\nTotal FatOg . \u00b0~ :\nSodium 35mg \u2018\nTotal Carbohydrate 27g ge\nSugars.27g 4\nProtein Og oe\n",
+  "cleaned": "ae racine ae + reread iter meri Maer ees eae\n\n4| Nutrition Facts t\nServing Size 2 bottle (250mL)\nAmount Per Serving\n\n{| Calories 110\n\n|] Total Fat og f\nSodium 35mg\nTotal Carbohydrate 279\n\n\u201c) | Sugars 27g\n\n: Protein Og .\n. r\nge\n"
+ },
+ "ph_drink_L2.jpg": {
+  "truth": {
+   "kcal": 110,
+   "protein": 0,
+   "carbs": 27,
+   "fat": 0
+  },
+  "plain": "| Diced ame a ee\nee ~ a\nsee BW tua - \u201c Ce he = a oe ies .\noy gS | ee\nBe ce eee en\n",
+  "cleaned": "; * Nut wae E Bre a, : %\nwe Serery Sie 1 note (250m) fe \\\n| Fat satog : L\n% Cartonydras \u2018a\n: Supars 279 7 : f : .\n| 1} Proton og ;\na 7 JU en genn r oa\nam ._ | \u201c8 DSS BT an\n% . . . oe.\n"
+ },
+ "us_bar_L0.jpg": {
+  "truth": {
+   "kcal": 210,
+   "protein": 20,
+   "carbs": 22,
+   "fat": 7
+  },
+  "plain": "Nutrition Facts\nServing size 1 bar (60g)\nCalories 210\n\nTotal Fat 7g 9%\n\nSaturated Fat 2.59\n\nSodium 190mg\n\nTotal Carbohydrate 22g 8%\nDietary Fiber 9g\n\nProtein 20g\n",
+  "cleaned": "Nutrition Facts\nServing size 1 bar (60g)\nCalories 210\n\nTotal Fat 7g 9%\n\nSaturated Fat 259\n\nSodium 190mg\n\nTotal Carbohydrate 22g 8%\nretary Fiber 99\n\nProtein 20g\n"
+ },
+ "us_bar_L1.jpg": {
+  "truth": {
+   "kcal": 210,
+   "protein": 20,
+   "carbs": 22,
+   "fat": 7
+  },
+  "plain": "Nutrition Facts.\n\nServing size 1 bar (60g)\n\nCalories 210\n\nTotal Fat7g 9% :\nSaturated Fat 25g\n\nSodium 190mg\nTotal Carbohydrate 22g 8% :\nDi\u00e9tary.Fiber 4g ue.\nProtein 20g\n",
+  "cleaned": "i Nutrition Facts ;\nff] Setving size 1 bar (60g)\n\n4 Calories 210 q\n\u20184 Total Fat 79 9% :\n4 Saturated Fat 259 j\ni} Sodium 190mg\n{| Total Carbohydrate 22g 8%\n\nDietary Fiber 9g .\nProtein 20g\nas\u201d .\n"
+ },
+ "us_bar_L2.jpg": {
+  "truth": {
+   "kcal": 210,
+   "protein": 20,
+   "carbs": 22,
+   "fat": 7
+  },
+  "plain": "aaa Bi zy oe = % 5a er\nit jutritic \u2018Facts ~ Co ae Se\n| soumiearneto ee woe\n\u2014 : eo\nee oe Te ey\nee ne Peo ait ad\n",
+  "cleaned": "| Nutrition Facts oN\n+ | eatories 210 -\n- | tore eet 7g i .\n\u201c\\ sanwaned Fat 290 ; \\\na ; Soden 1006g 7\nwit Total Carbonydrate 226 S% \u2018\n. a Dnetery Fiber 99 : '\nyo \u2014\u2014\n"
+ }
+}

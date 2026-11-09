@@ -3,6 +3,7 @@ import { PLANS, planById, nextDay, lastPerformance, suggest } from '../workouts.
 import { t, dateLabel } from '../i18n.js';
 import { esc, sheet, toast, confirmSheet, num } from '../ui.js';
 import { ICON } from '../icons.js';
+import { cfg as creatineCfg } from '../creatine.js';
 
 let restTimer = null;
 
@@ -30,6 +31,11 @@ export function renderWorkouts(root) {
     </section>`;
   })() : `<p class="note">${t('pick_plan')}</p>`}
 
+  ${!creatineCfg(st).on && !st.settings.creatinePromptHidden ? `<div class="note creatine-prompt">
+    <span>${t('creatine_prompt')}</span>
+    <div class="row gap-sm"><a class="btn sm" href="#/me" data-cr-go>${t('set_reminder')}</a><button class="btn sm ghost" data-cr-hide>${t('no_thanks')}</button></div>
+  </div>` : ''}
+
   <h3 class="section-title">${plan ? t('change_plan') : t('plans')}</h3>
   ${PLANS.map(p => `<section class="card plan-option ${p.id === st.activePlan ? 'active' : ''}">
     <div class="row between"><h3>${esc(p.name)}</h3><span class="pill">${esc(p.level)}</span></div>
@@ -48,6 +54,8 @@ export function renderWorkouts(root) {
   }).join('') : `<p class="empty">${t('no_workouts')}</p>`}
   `;
 
+  root.querySelector('[data-cr-hide]')?.addEventListener('click', () => { store.update(s => { s.settings.creatinePromptHidden = true; }); renderWorkouts(root); });
+  root.querySelector('[data-cr-go]')?.addEventListener('click', () => setTimeout(() => document.getElementById('supplements')?.scrollIntoView({ block: 'start' }), 80));
   root.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => { store.update(s => { s.activePlan = b.dataset.plan; }); toast(t('plan_set')); renderWorkouts(root); window.scrollTo(0, 0); });
   root.querySelectorAll('[data-start]').forEach(b => b.onclick = () => startSession(plan, b.dataset.start, root));
   root.querySelectorAll('[data-hist]').forEach(b => b.onclick = () => historySheet(st.sessions.find(s => s.id === b.dataset.hist), root));

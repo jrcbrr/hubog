@@ -4,6 +4,7 @@ import { t, dateLabel } from '../i18n.js';
 import { esc, ring, bar, fmt, fmt1, toast } from '../ui.js';
 import { MEALS, openFoodSheet } from './foodsheet.js';
 import { backupDue, saveBackup, snoozeBackup } from '../backup.js';
+import { cfg as creatineCfg, takenOn, toggleTaken, creatineStreak, isDue } from '../creatine.js';
 import { foodEmoji } from '../foods.js';
 import { ICON, MEAL_EMOJI } from '../icons.js';
 
@@ -64,6 +65,17 @@ export function renderToday(root, params) {
     ${bar(water, wGoal, 'm-w')}
   </section>
 
+  ${creatineCfg(st).on ? (() => {
+    const taken = takenOn(date, st);
+    const cs = creatineStreak(st.creatineLog || {}, store.todayKey(), store.shiftDay);
+    return `<section class="card supp ${taken ? 'done' : isToday && isDue() ? 'due' : ''}">
+      <span class="supp-icon" aria-hidden="true">Cr</span>
+      <div class="grow"><h3>${t('creatine')} ${creatineCfg(st).doseG} g</h3>
+        <small class="muted">${taken ? t('creatine_taken') + (cs > 1 ? `, ${cs} ${t('day_streak')}` : '') : isToday && isDue() ? t('creatine_due') : t('creatine_at', { time: creatineCfg(st).time })}</small></div>
+      <button class="btn sm ${taken ? 'ghost' : ''}" data-creatine aria-pressed="${taken}">${taken ? t('undo') : t('mark_taken')}</button>
+    </section>`;
+  })() : ''}
+
   ${MEALS.map(mealBlock).join('')}
   `;
 
@@ -77,6 +89,12 @@ export function renderToday(root, params) {
     renderToday(root, params);
   });
   root.querySelector('[data-snooze]')?.addEventListener('click', () => { snoozeBackup(); renderToday(root, params); });
+  root.querySelector('[data-creatine]')?.addEventListener('click', () => {
+    const was = takenOn(date);
+    toggleTaken(date);
+    if (!was) toast(t('creatine_logged'));
+    renderToday(root, params);
+  });
   root.querySelectorAll('[data-water]').forEach(b => b.onclick = () => {
     const before = water;
     store.update(s => { s.water[date] = Math.max(0, (s.water[date] || 0) + Number(b.dataset.water)); });

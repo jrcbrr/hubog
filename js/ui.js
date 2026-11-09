@@ -26,13 +26,16 @@ export function sheet(html, { onClose } = {}) {
   let closed = false;
   const close = () => {
     if (closed) return; closed = true;
+    document.removeEventListener('keydown', onKey);
     wrap.classList.remove('open');
     document.body.classList.remove('no-scroll');
     setTimeout(() => wrap.remove(), 250);
     onClose?.();
   };
+  const onKey = e => { if (e.key === 'Escape' && wrap === [...document.querySelectorAll('.sheet-wrap')].pop()) close(); };
   wrap.addEventListener('click', e => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
   window.addEventListener('hashchange', close, { once: true });
+  document.addEventListener('keydown', onKey);
   return { el: wrap.querySelector('.sheet'), close };
 }
 

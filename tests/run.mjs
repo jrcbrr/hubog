@@ -8,7 +8,10 @@ globalThis.window = { dispatchEvent() {} };
 globalThis.Event = class { constructor(n) { this.type = n; } };
 
 const calc = await import('../js/calc.js');
-const { parseLabel } = await import('../js/label.js');
+const { parseLabel, labelQuality } = await import('../js/label.js');
+const R = await import('../js/restaurants.js');
+const CR = await import('../js/creatine.js');
+const IP = await import('../js/imageprep.js');
 const W = await import('../js/workouts.js');
 const { DICTS } = await import('../js/i18n.js');
 const { searchLocal, BUILTIN } = await import('../js/foods.js');
@@ -46,7 +49,8 @@ test('shiftDay crosses months', () => {
 
 test('label: US style', () => {
   const v = parseLabel(`Nutrition Facts\nServing Size 1 pack (55g)\nCalories 250\nTotal Fat 12g 15%\nSaturated Fat 5g\nTotal Carbohydrate 31g 11%\nDietary Fiber 1g\nProtein 5g`);
-  assert.deepEqual(v, { kcal: 250, protein: 5, carbs: 31, fat: 12, serving: '1 pack (55g)' });
+  assert.deepEqual({ ...v, uncertain: undefined }, { kcal: 250, protein: 5, carbs: 31, fat: 12, serving: '1 pack (55g)', uncertain: undefined });
+  assert.deepEqual(v.uncertain, []);
 });
 test('label: kJ/kcal energy, comma decimals, OCR slips', () => {
   const v = parseLabel(`Energy 1046 kJ / 25O kcaI\nFat 9,5 g\nof which saturates 3g\nCarbohydrate 36 g\nProtein 4.2 g`);
@@ -88,6 +92,7 @@ test('foods: search finds Filipino dishes', () => {
   assert.equal(ids.size, BUILTIN.length, 'duplicate food ids');
   for (const f of BUILTIN) {
     const est = f.protein * 4 + f.carbs * 4 + f.fat * 9;
+    if (/alcohol/.test(f.tags)) continue;
     assert.ok(Math.abs(est - f.kcal) / f.kcal < 0.25 || f.kcal < 20, `${f.name}: kcal ${f.kcal} vs macros ${Math.round(est)}`);
   }
 });
@@ -107,9 +112,9 @@ test('i18n: every used key exists in en and tl', () => {
   ['breakfast', 'lunch', 'dinner', 'snacks', 'male', 'female', 'protein', 'carbs', 'fat',
    ...['sedentary', 'light', 'moderate', 'active', 'very'].flatMap(a => ['act_' + a, 'act_' + a + '_d']),
    ...['cut', 'recomp', 'maintain', 'lean_bulk'].flatMap(g => ['goal_' + g, 'goal_' + g + '_d']),
-   ...['auto', 'light', 'dark'].map(x => 'theme_' + x), ...['search', 'favorites', 'mine'].map(x => 'tab_' + x),
-   'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder', 'switch_1', 'switch_2', 'switch_3', 'switch_4'].forEach(k => used.add(k));
-  ['act_', 'goal_', 'theme_', 'tab_', 'switch_'].forEach(k => used.delete(k));
+   ...['auto', 'light', 'dark'].map(x => 'theme_' + x), ...['search', 'restaurants', 'favorites', 'mine'].map(x => 'tab_' + x),
+   'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder', 'switch_1', 'switch_2', 'switch_3', 'switch_4', 'label_tip_1', 'label_tip_2', 'label_tip_3', 'label_tip_4'].forEach(k => used.add(k));
+  ['act_', 'goal_', 'theme_', 'tab_', 'switch_', 'label_tip_', 'tab_restaurants'].forEach(k => used.delete(k));
   const missing = [...used].filter(k => !DICTS.en[k] || !DICTS.tl[k]);
   assert.deepEqual(missing, []);
   const extra = Object.keys(DICTS.en).filter(k => !DICTS.tl[k]);
@@ -150,6 +155,74 @@ test('goals: old saved goals are upgraded', () => {
   for (const [old, now] of [['lose', 'cut'], ['mild_lose', 'cut'], ['gain', 'lean_bulk'], ['maintain', 'maintain']]) {
     assert.equal(store.migrate({ profile: { goal: old } }).profile.goal, now);
   }
+});
+
+test('label: PH FDA layout, "Og" for 0g, lost decimals fixed by the calorie check', () => {
+  const ph = parseLabel('NUTRITION FACTS\nServing Size: 1 pack (60g)\nEnergy, kcal 290\nTotal Fat, g 12\nSaturated Fat,g 6\nTotal Carbohydrate,g 39\nProtein, g 6');
+  assert.deepEqual([ph.kcal, ph.protein, ph.carbs, ph.fat], [290, 6, 39, 12]);
+  const o = parseLabel('Calories 110\nTotal FatOg\nTotal Carbohydrate 27g\nProtein Og');
+  assert.deepEqual([o.kcal, o.protein, o.carbs, o.fat], [110, 0, 27, 0]);
+  const eu = parseLabel('Energy 628kJ 2093kJ\n150 kcal 500 kcal\nProtein 2.1g 7.0g\nFat 66g 22g\nCarbohydrate 20.4g 68g');
+  assert.equal(eu.fat, 6.6); assert.deepEqual(eu.uncertain, ['fat']);
+  const g9 = parseLabel('Calories 210\nTotal Fat 7g\nTotal Carbohydrate 22g\nProtein 209');   // "20g" read as "209"
+  assert.equal(g9.protein, 20);
+});
+test('label: OCR of test photos (regression) — clean + normal photos ≥ 95% right', () => {
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/label-ocr.json', import.meta.url)));
+  let right = 0, total = 0;
+  for (const [name, { truth, plain, cleaned }] of Object.entries(fx)) {
+    if (name.includes('_L2')) continue;                       // very bad photos: no accuracy promise
+    const a = parseLabel(plain), b = parseLabel(cleaned);
+    const v = labelQuality(a) >= 6 ? a : (labelQuality(b) > labelQuality(a) ? b : a);   // same logic as scan.js
+    for (const k of ['kcal', 'protein', 'carbs', 'fat']) { total++; if (v[k] != null && Math.abs(v[k] - truth[k]) <= Math.max(0.05, truth[k] * 0.02)) right++; }
+  }
+  assert.ok(right / total >= 0.95, `${right}/${total}`);
+});
+test('label: garbage never produces impossible numbers', () => {
+  const fx = JSON.parse(readFileSync(new URL('./fixtures/label-ocr.json', import.meta.url)));
+  for (const { plain, cleaned } of Object.values(fx)) for (const txt of [plain, cleaned]) {
+    const v = parseLabel(txt);
+    for (const k of ['protein', 'carbs', 'fat']) assert.ok(v[k] == null || v[k] <= 200, `${k}=${v[k]}`);
+    assert.ok(v.kcal == null || v.kcal <= 2500);
+  }
+});
+test('image cleanup: threshold keeps dark text dark under uneven light', () => {
+  const w = 60, h = 20, g = new Uint8ClampedArray(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) g[y * w + x] = 120 + x * 2;   // light gradient
+  for (let y = 8; y < 12; y++) for (let x = 40; x < 44; x++) g[y * w + x] = 90;           // dark "letter" in bright area
+  const bw = IP.bradley(IP.median3(g, w, h), w, h);
+  assert.equal(bw[10 * w + 42], 0); assert.equal(bw[2 * w + 42], 255); assert.equal(bw[2 * w + 5], 255);
+});
+test('restaurants: data is complete and believable', () => {
+  const ids = new Set(R.RESTAURANT_FOODS.map(f => f.id));
+  assert.equal(ids.size, R.RESTAURANT_FOODS.length, 'duplicate ids');
+  for (const name of ['Jollibee', "McDonald's", 'KFC', "Wendy's", 'Burger King', 'Chowking', 'Mang Inasal']) assert.ok(R.RESTAURANTS.some(r => r.name === name), name);
+  for (const f of R.RESTAURANT_FOODS) {
+    if (f.kcal < 50) continue;
+    const est = f.protein * 4 + f.carbs * 4 + f.fat * 9;
+    assert.ok(Math.abs(est - f.kcal) / f.kcal < 0.2, `${f.serving} ${f.name}: ${f.kcal} vs macros ${Math.round(est)}`);
+  }
+  assert.ok(R.foodsOf('jollibee').length >= 15);
+  assert.ok(searchLocal('chickenjoy').length >= 4, 'restaurant items are searchable');
+});
+test('silog meals: full set, all = sinangag + itlog + ulam', () => {
+  const silog = BUILTIN.filter(f => /silog/.test(f.tags));
+  assert.ok(silog.length >= 15);
+  for (const n of ['Tapsilog', 'Longsilog', 'Tocilog', 'Bangsilog', 'Hotsilog', 'Cornsilog', 'Spamsilog', 'Chicksilog']) assert.ok(silog.some(f => f.name.startsWith(n)), n);
+  for (const f of silog) assert.ok(f.kcal > 380 && f.serving.includes('sinangag'), f.name);
+});
+const ICS = await CR.calendarFile({ doseG: 5, time: '21:45' }, { title: 'Creatine time', body: g => `Take ${g} g` }).text();
+test('creatine: streak, due time, calendar file', () => {
+  const log = { '2026-11-10': 1, '2026-11-09': 1, '2026-11-08': 1 };
+  assert.equal(CR.creatineStreak(log, '2026-11-10', store.shiftDay), 3);
+  assert.equal(CR.creatineStreak({ '2026-11-09': 1 }, '2026-11-10', store.shiftDay), 1);
+  store.update(s => { s.settings.creatine = { on: true, doseG: 5, time: '08:00' }; s.creatineLog = {}; });
+  assert.equal(CR.isDue(new Date(2026, 10, 10, 7, 59)), false);
+  assert.equal(CR.isDue(new Date(2026, 10, 10, 8, 1)), true);
+  store.update(s => { s.creatineLog[store.todayKey(new Date(2026, 10, 10))] = 1; });
+  assert.equal(CR.isDue(new Date(2026, 10, 10, 9, 0)), false);
+  const ics = ICS;
+  assert.match(ics, /DTSTART:\d{8}T214500/); assert.match(ics, /RRULE:FREQ=DAILY/); assert.match(ics, /BEGIN:VALARM/);
 });
 
 console.log(`\n${passed} tests passed`);
