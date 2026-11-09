@@ -2,6 +2,8 @@
 import * as store from '../store.js';
 import { t } from '../i18n.js';
 import { esc, sheet, toast, num, fmt, fmt1 } from '../ui.js';
+import { foodEmoji } from '../foods.js';
+import { ICON } from '../icons.js';
 
 export const MEALS = ['breakfast', 'lunch', 'dinner', 'snacks'];
 
@@ -21,11 +23,12 @@ export function openFoodSheet(food, { date = store.todayKey(), meal = defaultMea
   const canGrams = !!food.per100;
 
   const s = sheet(`
-    <div class="row between">
-      <h3 class="sheet-title">${esc(food.name)}</h3>
-      ${food.id && !entry ? `<button class="icon-btn fav ${isFav ? 'on' : ''}" data-fav aria-label="${t('favorite')}">★</button>` : ''}
+    <div class="sheet-food">
+      <span class="tile" aria-hidden="true">${foodEmoji(food)}</span>
+      <div class="grow"><h3 class="sheet-title">${esc(food.name)}</h3>
+      <p class="muted small">${esc(food.serving || '')}${food.source === 'builtin' ? ', ' + t('approx') : ''}${food.source === 'off' ? ', Open Food Facts' : ''}</p></div>
+      ${food.id && !entry ? `<button class="icon-btn fav ${isFav ? 'on' : ''}" data-fav aria-label="${t('favorite')}" aria-pressed="${isFav}">${ICON.star}</button>` : ''}
     </div>
-    <p class="muted small">${esc(food.serving || '')}${food.source === 'builtin' ? ' · ' + t('approx') : ''}${food.source === 'off' ? ' · Open Food Facts' : ''}</p>
     <div class="nutri-preview" data-preview></div>
     <div class="grid2">
       <label>${t('servings')}

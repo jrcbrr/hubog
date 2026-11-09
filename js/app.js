@@ -3,6 +3,7 @@ import * as store from './store.js';
 import { t, initLang } from './i18n.js';
 import { applyTheme } from './theme.js';
 import { requestPersistentStorage } from './backup.js';
+import { ICON } from './icons.js';
 import { renderOnboarding } from './views/onboarding.js';
 import { renderToday } from './views/today.js';
 import { renderAdd } from './views/add.js';
@@ -25,11 +26,11 @@ const routes = {
 };
 
 function drawNav(active) {
-  const item = (r, icon, label) =>
-    `<a href="#/${r}" class="${active === r ? 'on' : ''}" ${active === r ? 'aria-current="page"' : ''}><span class="ni">${icon}</span><span>${label}</span></a>`;
-  nav.innerHTML = item('today', '◎', t('today')) + item('progress', '📈', t('progress')) +
-    `<a href="#/add" class="nav-add" aria-label="${t('add_food')}"><span>＋</span></a>` +
-    item('workouts', '🏋', t('workouts')) + item('me', '☺', t('me'));
+  const item = r =>
+    `<a href="#/${r}" class="${active === r ? 'on' : ''}" ${active === r ? 'aria-current="page"' : ''}>${ICON[r]}<span>${t(r)}</span></a>`;
+  nav.innerHTML = item('today') + item('progress') +
+    `<a href="#/add" class="nav-add" aria-label="${t('add_food')}"><span>${ICON.plus}</span></a>` +
+    item('workouts') + item('me');
 }
 
 function route() {

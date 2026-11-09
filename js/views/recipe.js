@@ -1,7 +1,8 @@
 // Recipe builder: combine foods into a dish, log it per serving.
 import * as store from '../store.js';
-import { searchLocal } from '../foods.js';
+import { searchLocal, foodEmoji } from '../foods.js';
 import { sumEntries } from '../calc.js';
+import { ICON } from '../icons.js';
 import { t } from '../i18n.js';
 import { esc, num, fmt, fmt1, toast, confirmSheet } from '../ui.js';
 
@@ -25,7 +26,7 @@ export function renderRecipe(root, params) {
     const tot = sumEntries(draft.ingredients);
     const per = n => fmt1(n / Math.max(1, draft.servings));
     root.innerHTML = `
-    <header class="page-head"><a class="icon-btn" href="${back}" aria-label="${t('back')}">‹</a><h2>${existing ? t('edit_recipe') : t('new_recipe')}</h2></header>
+    <header class="page-head"><a class="icon-btn" href="${back}" aria-label="${t('back')}">${ICON.chevL}</a><h2>${existing ? t('edit_recipe') : t('new_recipe')}</h2></header>
     <div class="card form">
       <label>${t('recipe_name')}<input data-name value="${esc(draft.name)}" placeholder="${t('recipe_ph')}"></label>
       <label>${t('servings_makes')}<input data-servings type="number" min="1" inputmode="numeric" value="${draft.servings}"></label>
@@ -61,7 +62,7 @@ export function renderRecipe(root, params) {
     const q = root.querySelector('[data-q]'), res = root.querySelector('[data-results]');
     q.oninput = () => {
       const items = q.value.trim() ? searchLocal(q.value, store.get().customFoods).slice(0, 8) : [];
-      res.innerHTML = items.map((f, i) => `<button class="food-row" data-pick="${i}"><span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving)}</small></span><span class="kcal">${fmt(f.kcal)}</span></button>`).join('');
+      res.innerHTML = items.map((f, i) => `<button class="food-row" data-pick="${i}"><span class="tile">${foodEmoji(f)}</span><span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving)}</small></span><span class="kcal">${fmt(f.kcal)}</span></button>`).join('');
       res.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => {
         const f = items[b.dataset.pick];
         draft.ingredients.push({ name: f.name, serving: f.serving, kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat, qty: 1 });

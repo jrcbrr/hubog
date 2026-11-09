@@ -69,3 +69,4 @@ js/views/*.js      screens
 - Built-in food values are approximate home-style estimates.
 - Hubog gives estimates, not medical advice.
 - Packaged food data © Open Food Facts contributors, ODbL.
+- Poppins font © The Poppins Project Authors, SIL Open Font License 1.1 (see `fonts/OFL.txt`).

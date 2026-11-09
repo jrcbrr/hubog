@@ -1,5 +1,6 @@
 import * as store from '../store.js';
-import { searchLocal, BUILTIN } from '../foods.js';
+import { searchLocal, BUILTIN, foodEmoji } from '../foods.js';
+import { ICON } from '../icons.js';
 import { searchOFF, lookupBarcode } from '../off.js';
 import { startBarcodeScan, readLabel } from '../scan.js';
 import { parseLabel } from '../label.js';
@@ -25,15 +26,15 @@ export function renderAdd(root, params) {
   const open = f => openFoodSheet(f, { date, meal, onDone: after });
 
   root.innerHTML = `
-  <header class="page-head"><a class="icon-btn" href="#/today?date=${date}" aria-label="${t('back')}">‹</a>
+  <header class="page-head"><a class="icon-btn" href="#/today?date=${date}" aria-label="${t('back')}">${ICON.chevL}</a>
     <h2>${t('add_to')} ${t(meal)}</h2></header>
   <div class="tools">
-    <button class="tool" data-act="barcode"><span>▥</span>${t('scan_barcode')}</button>
-    <button class="tool" data-act="label"><span>📷</span>${t('scan_label')}</button>
-    <button class="tool" data-act="quick"><span>⚡</span>${t('quick_add')}</button>
-    <button class="tool" data-act="create"><span>＋</span>${t('create_food')}</button>
+    <button class="tool" data-act="barcode"><span class="ti">${ICON.barcode}</span>${t('scan_barcode')}</button>
+    <button class="tool" data-act="label"><span class="ti">${ICON.camera}</span>${t('scan_label')}</button>
+    <button class="tool" data-act="quick"><span class="ti">${ICON.bolt}</span>${t('quick_add')}</button>
+    <button class="tool" data-act="create"><span class="ti">${ICON.pencil}</span>${t('create_food')}</button>
   </div>
-  <div class="search-box"><input id="q" type="search" placeholder="${t('search_ph')}" autocomplete="off" enterkeyhint="search"></div>
+  <div class="search-box">${ICON.search}<input id="q" type="search" placeholder="${t('search_ph')}" autocomplete="off" enterkeyhint="search"></div>
   <div class="tabs" role="tablist">
     ${['search', 'favorites', 'mine'].map(k => `<button role="tab" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t('tab_' + k)}</button>`).join('')}
   </div>
@@ -45,6 +46,7 @@ export function renderAdd(root, params) {
   const online = root.querySelector('#online');
 
   const row = f => `<button class="food-row" data-id="${esc(f.id)}">
+      <span class="tile" aria-hidden="true">${foodEmoji(f)}</span>
       <span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving || '')}</small></span>
       <span class="kcal">${fmt(f.kcal)}<small> kcal</small></span></button>`;
   const pool = new Map();

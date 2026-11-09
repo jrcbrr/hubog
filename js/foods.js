@@ -138,3 +138,28 @@ export function searchLocal(query, extra = []) {
     .map(x => x.f)
     .slice(0, 40);
 }
+
+// Emoji for a food, from its name/tags. Keeps lists warm and easy to scan.
+const EMOJI_RULES = [
+  [/halo-halo|leche flan|dessert|ice cream/, '🍨'], [/milk tea|bubble|pearl/, '🧋'], [/coffee|kape/, '☕'],
+  [/soft drink|soda|cola|juice|drink/, '🥤'], [/milk|dairy|yogurt/, '🥛'], [/whey|protein shake|supplement/, '🥤'],
+  [/egg|itlog|kwek/, '🍳'], [/silog/, '🍳'],
+  [/sinigang|tinola|bulalo|nilaga|soup|lomi|arroz caldo|lugaw|porridge/, '🍲'],
+  [/pancit|noodle|canton|bihon|spaghetti|pasta/, '🍜'],
+  [/fish|bangus|tilapia|tuyo|sardine|tuna|isda|paksiw/, '🐟'], [/shrimp|hipon/, '🦐'],
+  [/chicken|manok|inasal|afritada/, '🍗'], [/beef|baka|tapa|bistek|caldereta|kare-kare|oxtail/, '🥩'],
+  [/pork|baboy|lechon|sisig|liempo|longganisa|tocino|menudo|bicol|hotdog|luncheon|spam|bbq/, '🍖'],
+  [/burger/, '🍔'], [/fries/, '🍟'], [/siomai|dumpling|siopao|bun/, '🥟'], [/lumpia|spring roll|turon/, '🌯'],
+  [/mango|mangga/, '🥭'], [/banana|saging|lakatan|saba/, '🍌'], [/pineapple/, '🍍'], [/apple/, '🍎'], [/papaya|fruit/, '🍈'],
+  [/laing|pinakbet|chopsuey|monggo|gulay/, '🥬'], [/coconut|buko/, '🥥'], [/kamote|camote|sweet potato/, '🍠'], [/taho/, '🍮'],
+  [/puto|bibingka|suman|kakanin|rice cake|champorado/, '🍡'], [/bread|pandesal|ensaymada|tasty/, '🍞'], [/oat/, '🥣'],
+  [/peanut/, '🥜'], [/rice|kanin|sinangag/, '🍚'],
+  [/gulay|vegetable|pinakbet|chopsuey|monggo|laing|talong|eggplant|salad/, '🥬'],
+  [/street|fishball/, '🍢'],
+];
+export function foodEmoji(f) {
+  const hay = `${f.name || ''} ${f.tags || ''}`.toLowerCase();
+  if (f.source === 'recipe') return '🥘';
+  for (const [re, e] of EMOJI_RULES) if (re.test(hay)) return e;
+  return '🍽️';
+}

@@ -2,6 +2,7 @@ import * as store from '../store.js';
 import { PLANS, planById, nextDay, lastPerformance, suggest } from '../workouts.js';
 import { t, dateLabel } from '../i18n.js';
 import { esc, sheet, toast, confirmSheet, num } from '../ui.js';
+import { ICON } from '../icons.js';
 
 let restTimer = null;
 
@@ -17,13 +18,14 @@ export function renderWorkouts(root) {
   <header class="page-head"><h2>${t('workouts')}</h2></header>
   ${plan ? (() => {
     const day = nextDay(plan, st.sessions);
-    return `<section class="card plan-card">
-      <small class="muted">${t('your_plan')}</small>
+    return `<section class="plan-hero">
+      <small>${t('your_plan')}</small>
       <h3>${esc(plan.name)}</h3>
-      <p class="muted small">${thisWeek} / ${plan.perWeek} ${t('this_week')}</p>
+      <small>${thisWeek} / ${plan.perWeek} ${t('this_week')}</small>
+      <div class="week-dots" aria-hidden="true">${Array.from({ length: plan.perWeek }, (_, i) => `<i class="${i < thisWeek ? 'on' : ''}"></i>`).join('')}</div>
       <div class="next-day"><b>${t('next_up')}: ${esc(day.name)}</b>
-        <ul>${day.exercises.map(e => `<li>${esc(e.name)} <span class="muted">${e.sets}×${e.reps[0]}–${e.reps[1]}${e.type === 'time' ? 's' : ''}</span></li>`).join('')}</ul></div>
-      <button class="btn block" data-start="${day.id}">▶ ${t('start_workout')}</button>
+        <ul>${day.exercises.map(e => `<li>${esc(e.name)} <span>${e.sets} × ${e.reps[0]}–${e.reps[1]}${e.type === 'time' ? 's' : ''}</span></li>`).join('')}</ul></div>
+      <button class="btn block" data-start="${day.id}">${ICON.play} ${t('start_workout')}</button>
       <div class="row gap-sm wrap mt">${plan.days.map(d => d.id === day.id ? '' : `<button class="btn sm ghost" data-start="${d.id}">${t('do_instead')} ${esc(d.name)}</button>`).join('')}</div>
     </section>`;
   })() : `<p class="note">${t('pick_plan')}</p>`}
@@ -32,7 +34,7 @@ export function renderWorkouts(root) {
   ${PLANS.map(p => `<section class="card plan-option ${p.id === st.activePlan ? 'active' : ''}">
     <div class="row between"><h3>${esc(p.name)}</h3><span class="pill">${esc(p.level)}</span></div>
     <p class="muted small">${esc(p.desc)}</p>
-    <p class="small">🗓 ${p.perWeek}× / ${t('week')} · 🏋 ${esc(p.equipment)} · ${p.days.length} ${t('workout_days')}</p>
+    <p class="plan-meta"><span>${p.perWeek}× / ${t('week')}</span><span>${esc(p.equipment)}</span><span>${p.days.length} ${t('workout_days')}</span></p>
     ${p.id === st.activePlan ? `<span class="pill on">✓ ${t('current')}</span>` : `<button class="btn sm" data-plan="${p.id}">${t('use_plan')}</button>`}
   </section>`).join('')}
 
@@ -40,8 +42,8 @@ export function renderWorkouts(root) {
   ${done.length ? [...done].reverse().slice(0, 20).map(s => {
     const sets = s.exercises.reduce((n, e) => n + e.sets.filter(x => x.done).length, 0);
     const vol = s.exercises.reduce((n, e) => n + e.sets.filter(x => x.done).reduce((a, x) => a + num(x.kg) * num(x.reps), 0), 0);
-    return `<button class="card history-row" data-hist="${s.id}"><span class="grow"><b>${esc(s.dayName)}</b>
-      <small class="muted">${esc(planById(s.planId)?.name || '')} · ${dateLabel(s.date)}</small></span>
+    return `<button class="card history-row" data-hist="${s.id}"><span class="tile">${ICON.workouts}</span><span class="grow"><b>${esc(s.dayName)}</b>
+      <small class="muted">${dateLabel(s.date)}, ${esc(planById(s.planId)?.name || '')}</small></span>
       <span class="small right">${sets} ${t('sets')}<br><span class="muted">${Math.round((s.finishedAt - s.startedAt) / 60000)} min${vol ? ` · ${Math.round(vol)} kg` : ''}</span></span></button>`;
   }).join('') : `<p class="empty">${t('no_workouts')}</p>`}
   `;
@@ -125,7 +127,7 @@ function renderSession(root) {
     if (!any) { toast(t('mark_a_set')); return; }
     stopRest(root);
     store.update(s => { s.sessions.push({ ...s.activeSession, finishedAt: Date.now() }); s.activeSession = null; });
-    toast('💪 ' + t('workout_saved'));
+    toast(t('workout_saved'));
     renderWorkouts(root);
   };
   root.querySelector('[data-cancel]').onclick = async () => {

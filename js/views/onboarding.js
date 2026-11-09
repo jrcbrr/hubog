@@ -20,19 +20,19 @@ export function renderOnboarding(root, { editing = false } = {}) {
 
   root.innerHTML = `
   <section class="onboard">
-    ${editing ? '' : `<div class="hero">
+    ${editing ? '' : `<div class="hero leaf">
       <img src="icons/icon.svg" alt="" class="hero-logo">
       <h1>Hubog</h1>
       <p class="muted">${t('tagline')}</p>
       <div class="row center gap-sm lang-pick">
-        <button class="btn sm ${getLang() === 'en' ? '' : 'ghost'}" data-lang="en">English</button>
-        <button class="btn sm ${getLang() === 'tl' ? '' : 'ghost'}" data-lang="tl">Tagalog</button>
+        <button class="btn sm ${getLang() === 'en' ? 'on' : ''}" data-lang="en" aria-pressed="${getLang() === 'en'}">English</button>
+        <button class="btn sm ${getLang() === 'tl' ? 'on' : ''}" data-lang="tl" aria-pressed="${getLang() === 'tl'}">Tagalog</button>
       </div>
     </div>`}
     ${editing ? '' : `<div class="card restore-card">
       <h3>${t('have_backup')}</h3>
       <p class="muted small">${t('have_backup_d')}</p>
-      <label class="btn ghost block file-btn">⬆ ${t('restore_backup')}<input type="file" accept="application/json,.json" hidden data-restore></label>
+      <label class="btn sm file-btn">${t('restore_backup')}<input type="file" accept="application/json,.json" hidden data-restore></label>
     </div>`}
     <form id="ob" class="card form">
       <h2>${editing ? t('edit_profile') : t('about_you')}</h2>
@@ -56,7 +56,7 @@ export function renderOnboarding(root, { editing = false } = {}) {
           <span class="goal-mark" aria-hidden="true"></span></span></label>`).join('')}
       </div></fieldset>
       <div id="preview" class="preview"></div>
-      <button class="btn block" type="submit">${editing ? t('save') : t('start')}</button>
+      <button class="btn mango block" type="submit">${editing ? t('save') : t('start')}</button>
       ${editing ? `<a class="btn ghost block" href="#/me">${t('cancel')}</a>` : ''}
     </form>
     <p class="disclaimer">${t('disclaimer')}</p>

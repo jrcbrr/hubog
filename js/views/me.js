@@ -5,6 +5,7 @@ import { esc, toast, confirmSheet, num, fmt, sheet } from '../ui.js';
 import { applyTheme } from '../theme.js';
 import { foodFormSheet } from './add.js';
 import { saveBackup, restoreFromFile } from '../backup.js';
+import { foodEmoji } from '../foods.js';
 
 export function renderMe(root) {
   const st = store.get();
@@ -18,8 +19,8 @@ export function renderMe(root) {
 
   <section class="card">
     <div class="row between"><h3>${t('profile')}</h3><a class="btn sm ghost" href="#/profile">${t('edit')}</a></div>
-    <p class="small">${t(p.sex)} · ${p.age} ${t('yrs')} · ${p.heightCm} cm · ${p.weightKg} kg</p>
-    <p class="small">${t('act_' + p.activity)} · ${t('goal_' + p.goal)}</p>
+    <p class="small">${t(p.sex)}, ${p.age} ${t('yrs')}, ${p.heightCm} cm, ${p.weightKg} kg</p>
+    <p class="small">${t('act_' + p.activity)}, ${t('goal_' + p.goal)}</p>
   </section>
 
   <section class="card">
@@ -48,16 +49,16 @@ export function renderMe(root) {
 
   <section class="card">
     <h3>${t('my_foods')} (${mine.length})</h3>
-    ${mine.length ? mine.map(f => `<button class="food-row" data-food="${esc(f.id)}"><span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving)}</small></span><span class="kcal">${fmt(f.kcal)}</span></button>`).join('') : `<p class="empty">${t('no_my_foods')}</p>`}
-    ${st.recipes.length ? `<h4 class="list-head">${t('recipes')}</h4>` + st.recipes.map(r => `<a class="food-row" href="#/recipe?id=${r.id}"><span class="grow"><b>${esc(r.name)}</b><small class="muted">${r.servings} ${t('servings').toLowerCase()}</small></span><span>›</span></a>`).join('') : ''}
+    ${mine.length ? mine.map(f => `<button class="food-row" data-food="${esc(f.id)}"><span class="tile">${foodEmoji(f)}</span><span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving)}</small></span><span class="kcal">${fmt(f.kcal)}</span></button>`).join('') : `<p class="empty">${t('no_my_foods')}</p>`}
+    ${st.recipes.length ? `<h4 class="list-head">${t('recipes')}</h4>` + st.recipes.map(r => `<a class="food-row" href="#/recipe?id=${r.id}"><span class="tile">🥘</span><span class="grow"><b>${esc(r.name)}</b><small class="muted">${r.servings} ${t('servings').toLowerCase()}</small></span><span>›</span></a>`).join('') : ''}
   </section>
 
   <section class="card">
     <h3>${t('backup')}</h3>
     <p class="muted small">${t('backup_help')}</p>
     <p class="small"><b>${t('last_backup')}:</b> ${st.settings.lastBackupAt ? new Date(st.settings.lastBackupAt).toLocaleDateString() : t('never')}</p>
-    <button class="btn block" data-export>⬇ ${t('export')}</button>
-    <label class="btn ghost block file-btn">⬆ ${t('import')}<input type="file" accept="application/json,.json" hidden data-import></label>
+    <button class="btn block" data-export>${t('export')}</button>
+    <label class="btn ghost block file-btn">${t('import')}<input type="file" accept="application/json,.json" hidden data-import></label>
     <details class="mt"><summary class="small"><b>${t('switch_title')}</b></summary>
       <ol class="small steps">${[1, 2, 3, 4].map(i => `<li>${t('switch_' + i)}</li>`).join('')}</ol>
     </details>
