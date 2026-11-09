@@ -39,8 +39,15 @@ Camera scanning needs HTTPS (or `localhost`).
 
 ## Deploy (GitHub Pages)
 
-Settings → Pages → Source: *Deploy from a branch* → `main` / `(root)`.
-The app will be at `https://<user>.github.io/hubog/`.
+Settings → Pages → Source: **GitHub Actions**. Every push to `main` runs the tests, stamps `sw.js` with the
+commit id, and publishes. The app will be at `https://<user>.github.io/hubog/`.
+
+### How updates reach installed (home-screen) apps
+- App files are fetched network-first with `cache: 'no-cache'`, so the phone asks GitHub whether a file changed
+  instead of reusing a 10-minute-old copy.
+- Each deploy has a new service-worker version. The app checks for it when it opens and whenever it comes back
+  to the front (`visibilitychange`), then reloads itself into the new version (it waits if you're typing or have a
+  sheet open).
 
 ## Tests
 

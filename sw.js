@@ -1,5 +1,7 @@
-// Hubog service worker — caches the app so it works offline.
-const VERSION = 'hubog-v8';
+// Hubog service worker — caches the app so it works offline, and picks up new releases.
+// VERSION is replaced with the commit id on every deploy (.github/workflows/deploy.yml), so each release
+// installs a new service worker and the open app reloads itself (see js/app.js).
+const VERSION = 'hubog-v9';
 const APP = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png',
   './js/app.js', './js/store.js', './js/calc.js', './js/foods.js', './js/off.js', './js/scan.js', './js/label.js',
@@ -9,7 +11,10 @@ const APP = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(APP)).then(() => self.skipWaiting()));
+  // cache: 'reload' skips the browser's HTTP cache so a new release never stores old files
+  e.waitUntil(caches.open(VERSION)
+    .then(c => c.addAll(APP.map(u => new Request(u, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -33,8 +38,9 @@ self.addEventListener('fetch', e => {
   if (url.hostname.endsWith('openfoodfacts.org')) return;
 
   if (url.origin === location.origin) {
-    // App files: network first (get updates), fall back to cache when offline
-    e.respondWith(fetch(e.request)
+    // App files: network first, asking the server if the file changed (GitHub Pages otherwise lets the
+    // browser reuse old copies for 10 minutes). Falls back to the saved copy when offline.
+    e.respondWith(fetch(e.request, { cache: 'no-cache' })
       .then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); return res; })
       .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html'))));
   } else if (/unpkg\.com|jsdelivr\.net/.test(url.hostname)) {

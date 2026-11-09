@@ -83,7 +83,24 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) chec
 
 startReminderLoop({ title: t('creatine_notif_title'), body: g => t('creatine_notif_body', { g }) });
 
-// Offline support
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW failed', e));
+// Offline support + automatic updates (works for the home-screen app too).
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+    const check = () => reg.update().catch(() => {});
+    // A home-screen app is usually resumed, not reopened, so check whenever it comes back to the front
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+    setInterval(check, 30 * 60_000);
+  }).catch(e => console.warn('SW failed', e));
+
+  // A new version took over: reload into it, unless you're in the middle of typing or editing something
+  let reloading = false;
+  const reloadWhenIdle = () => {
+    if (reloading) return;
+    const busy = document.querySelector('.sheet-wrap') || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+    if (busy) { setTimeout(reloadWhenIdle, 3000); return; }
+    reloading = true;
+    location.reload();
+  };
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) reloadWhenIdle(); });
 }
