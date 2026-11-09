@@ -44,8 +44,9 @@ export function onChange(fn) { listeners.add(fn); return () => listeners.delete(
 export function exportJSON() { return JSON.stringify(state, null, 2); }
 export function importJSON(text) {
   const data = JSON.parse(text);
-  if (!data || typeof data !== 'object' || !('log' in data)) throw new Error('Not a Hubog backup');
-  state = { ...defaults(), ...data };
+  if (!data || typeof data !== 'object' || !('log' in data) || !('profile' in data)) throw new Error('Not a Hubog backup');
+  const d = defaults();
+  state = { ...d, ...data, settings: { ...d.settings, ...data.settings, lastBackupAt: Date.now() } };
   save();
 }
 export function resetAll() { state = defaults(); save(); }

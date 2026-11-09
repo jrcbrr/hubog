@@ -4,6 +4,7 @@ import { t, setLang, getLang } from '../i18n.js';
 import { esc, toast, confirmSheet, num, fmt, sheet } from '../ui.js';
 import { applyTheme } from '../theme.js';
 import { foodFormSheet } from './add.js';
+import { saveBackup, restoreFromFile } from '../backup.js';
 
 export function renderMe(root) {
   const st = store.get();
@@ -54,10 +55,12 @@ export function renderMe(root) {
   <section class="card">
     <h3>${t('backup')}</h3>
     <p class="muted small">${t('backup_help')}</p>
-    <div class="row gap wrap">
-      <button class="btn ghost" data-export>⬇ ${t('export')}</button>
-      <label class="btn ghost file-btn">⬆ ${t('import')}<input type="file" accept="application/json,.json" hidden data-import></label>
-    </div>
+    <p class="small"><b>${t('last_backup')}:</b> ${st.settings.lastBackupAt ? new Date(st.settings.lastBackupAt).toLocaleDateString() : t('never')}</p>
+    <button class="btn block" data-export>⬇ ${t('export')}</button>
+    <label class="btn ghost block file-btn">⬆ ${t('import')}<input type="file" accept="application/json,.json" hidden data-import></label>
+    <details class="mt"><summary class="small"><b>${t('switch_title')}</b></summary>
+      <ol class="small steps">${[1, 2, 3, 4].map(i => `<li>${t('switch_' + i)}</li>`).join('')}</ol>
+    </details>
   </section>
 
   <section class="card">
@@ -87,19 +90,15 @@ export function renderMe(root) {
     foodFormSheet(f, () => renderMe(root));
   });
 
-  root.querySelector('[data-export]').onclick = () => {
-    const blob = new Blob([store.exportJSON()], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `hubog-backup-${store.todayKey()}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  root.querySelector('[data-export]').onclick = async () => {
+    const r = await saveBackup();
+    if (r !== 'cancelled') { toast(t('backup_saved')); renderMe(root); }
   };
   root.querySelector('[data-import]').onchange = async e => {
     const file = e.target.files[0];
     if (!file) return;
     if (!await confirmSheet(t('import_q'), t('import'), t('cancel'))) return;
-    try { store.importJSON(await file.text()); toast(t('import_done')); location.hash = '#/today'; location.reload(); }
+    try { await restoreFromFile(file); toast(t('import_done')); location.hash = '#/today'; location.reload(); }
     catch { toast(t('import_failed')); }
   };
   root.querySelector('[data-reset]').onclick = async () => {

@@ -25,7 +25,7 @@ It's plain HTML, CSS and JavaScript. There's no backend, no build step and no ac
 - Streaks, days on target, 7/30-day calorie chart, average macros, weight trend chart, BMI
 - English and Tagalog, light and dark theme
 - Installable PWA that works offline
-- Backup export/import (JSON)
+- **Move to a new phone**: "Save backup" shares a file (Drive, Messenger, email) or downloads it; "Restore from backup" is on the welcome screen and in Me. Weekly backup reminder; asks the browser for persistent storage so data isn't auto-cleared
 
 ## Run locally
 

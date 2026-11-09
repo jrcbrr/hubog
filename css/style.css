@@ -268,3 +268,9 @@ details summary { cursor: pointer; margin-top: 8px; }
   .summary-side { grid-template-columns: 1fr 1fr; width: 100%; text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* backup */
+.backup-nudge { display: grid; gap: 8px; }
+.restore-card { text-align: center; }
+.restore-card p { margin: 6px 0 0; }
+.steps { padding-left: 20px; margin: 8px 0 0; display: grid; gap: 6px; }

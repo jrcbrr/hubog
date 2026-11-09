@@ -1,7 +1,8 @@
 import * as store from '../store.js';
 import { targets, tdee } from '../calc.js';
-import { t, setLang, getLang } from '../i18n.js';
-import { esc, num, fmt } from '../ui.js';
+import { t, setLang, getLang, initLang } from '../i18n.js';
+import { esc, num, fmt, toast } from '../ui.js';
+import { restoreFromFile } from '../backup.js';
 
 export function renderOnboarding(root, { editing = false } = {}) {
   const p = store.get().profile || { sex: 'male', age: 18, heightCm: 165, weightKg: 60, activity: 'light', goal: 'maintain' };
@@ -18,6 +19,11 @@ export function renderOnboarding(root, { editing = false } = {}) {
         <button class="btn sm ${getLang() === 'en' ? '' : 'ghost'}" data-lang="en">English</button>
         <button class="btn sm ${getLang() === 'tl' ? '' : 'ghost'}" data-lang="tl">Tagalog</button>
       </div>
+    </div>`}
+    ${editing ? '' : `<div class="card restore-card">
+      <h3>${t('have_backup')}</h3>
+      <p class="muted small">${t('have_backup_d')}</p>
+      <label class="btn ghost block file-btn">⬆ ${t('restore_backup')}<input type="file" accept="application/json,.json" hidden data-restore></label>
     </div>`}
     <form id="ob" class="card form">
       <h2>${editing ? t('edit_profile') : t('about_you')}</h2>
@@ -44,6 +50,20 @@ export function renderOnboarding(root, { editing = false } = {}) {
     </form>
     <p class="disclaimer">${t('disclaimer')}</p>
   </section>`;
+
+  root.querySelector('[data-restore]')?.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      await restoreFromFile(file);
+      initLang();
+      toast(t('import_done'));
+      location.hash = '#/today';
+      location.reload();
+    } catch {
+      toast(t('import_failed'));
+    }
+  });
 
   const form = root.querySelector('#ob');
   const read = () => {

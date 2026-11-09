@@ -3,6 +3,7 @@ import { sumEntries, streak } from '../calc.js';
 import { t, dateLabel } from '../i18n.js';
 import { esc, ring, bar, fmt, fmt1, toast } from '../ui.js';
 import { MEALS, openFoodSheet } from './foodsheet.js';
+import { backupDue, saveBackup, snoozeBackup } from '../backup.js';
 
 export const getTargets = st => st.profile.customTargets || st.profile.targets;
 
@@ -37,6 +38,11 @@ export function renderToday(root, params) {
     <a class="icon-btn ${isToday ? 'disabled' : ''}" href="${isToday ? '#/today' : '#/today?date=' + store.shiftDay(date, 1)}" aria-label="${t('next_day')}">›</a>
   </header>
 
+  ${isToday && backupDue(st) ? `<div class="note backup-nudge">
+    <span>💾 ${t('backup_nudge')}</span>
+    <div class="row gap-sm"><button class="btn sm" data-backup>${t('backup_now')}</button><button class="btn sm ghost" data-snooze>${t('later')}</button></div>
+  </div>` : ''}
+
   <section class="card summary">
     <div class="ring-wrap">${ring(tot.kcal, tg.kcal, { label: fmt(Math.abs(left)), sub: left >= 0 ? t('kcal_left') : t('kcal_over'), over: left < 0 })}</div>
     <div class="summary-side">
@@ -67,6 +73,11 @@ export function renderToday(root, params) {
     openFoodSheet({ id: e.foodId, name: e.name, serving: e.serving, kcal: e.kcal, protein: e.protein, carbs: e.carbs, fat: e.fat },
       { date, entry: e, onDone: () => renderToday(root, params) });
   });
+  root.querySelector('[data-backup]')?.addEventListener('click', async () => {
+    if (await saveBackup() !== 'cancelled') toast(t('backup_saved'));
+    renderToday(root, params);
+  });
+  root.querySelector('[data-snooze]')?.addEventListener('click', () => { snoozeBackup(); renderToday(root, params); });
   root.querySelectorAll('[data-water]').forEach(b => b.onclick = () => {
     const before = water;
     store.update(s => { s.water[date] = Math.max(0, (s.water[date] || 0) + Number(b.dataset.water)); });

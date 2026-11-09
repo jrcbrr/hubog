@@ -2,6 +2,7 @@
 import * as store from './store.js';
 import { t, initLang } from './i18n.js';
 import { applyTheme } from './theme.js';
+import { requestPersistentStorage } from './backup.js';
 import { renderOnboarding } from './views/onboarding.js';
 import { renderToday } from './views/today.js';
 import { renderAdd } from './views/add.js';
@@ -56,6 +57,7 @@ function route() {
 
 initLang();
 applyTheme();
+requestPersistentStorage();
 window.addEventListener('hashchange', route);
 window.addEventListener('hubog:lang', route);
 route();

@@ -107,12 +107,36 @@ test('i18n: every used key exists in en and tl', () => {
    ...['sedentary', 'light', 'moderate', 'active', 'very'].flatMap(a => ['act_' + a, 'act_' + a + '_d']),
    ...['lose', 'mild_lose', 'maintain', 'gain'].map(g => 'goal_' + g),
    ...['auto', 'light', 'dark'].map(x => 'theme_' + x), ...['search', 'favorites', 'mine'].map(x => 'tab_' + x),
-   'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder'].forEach(k => used.add(k));
-  ['act_', 'goal_', 'theme_', 'tab_'].forEach(k => used.delete(k));
+   'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder', 'switch_1', 'switch_2', 'switch_3', 'switch_4'].forEach(k => used.add(k));
+  ['act_', 'goal_', 'theme_', 'tab_', 'switch_'].forEach(k => used.delete(k));
   const missing = [...used].filter(k => !DICTS.en[k] || !DICTS.tl[k]);
   assert.deepEqual(missing, []);
   const extra = Object.keys(DICTS.en).filter(k => !DICTS.tl[k]);
   assert.deepEqual(extra, [], 'en keys missing from tl');
+});
+
+test('backup: export then restore on a "new device" brings everything back', () => {
+  store.update(s => {
+    s.profile = { sex: 'male', age: 19, heightCm: 170, weightKg: 68, activity: 'light', goal: 'maintain', targets: { kcal: 2400, protein: 109, carbs: 300, fat: 72 } };
+    s.log['2026-11-10'] = [{ id: 'a', name: 'Pork adobo', kcal: 380, protein: 25, carbs: 4, fat: 29, qty: 1, meal: 'lunch' }];
+    s.sessions.push({ id: 'w1', planId: 'ppl', dayId: 'push', finishedAt: 1, exercises: [] });
+    s.recipes.push({ id: 'r1', name: 'Sinigang ni Lola', servings: 4, ingredients: [] });
+    s.settings.lang = 'tl';
+  });
+  const file = store.exportJSON();
+  store.resetAll();                      // new phone: empty
+  assert.equal(store.get().profile, null);
+  store.importJSON(file);
+  const st = store.get();
+  assert.equal(st.profile.weightKg, 68);
+  assert.equal(st.log['2026-11-10'][0].name, 'Pork adobo');
+  assert.equal(st.sessions.length, 1);
+  assert.equal(st.recipes[0].name, 'Sinigang ni Lola');
+  assert.equal(st.settings.lang, 'tl');
+  assert.ok(st.settings.lastBackupAt > 0);
+  assert.throws(() => store.importJSON('{"hello":1}'));
+  assert.throws(() => store.importJSON('not json'));
+  assert.equal(store.get().profile.weightKg, 68, 'bad file must not wipe data');
 });
 
 console.log(`\n${passed} tests passed`);
