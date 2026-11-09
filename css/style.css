@@ -274,3 +274,22 @@ details summary { cursor: pointer; margin-top: 8px; }
 .restore-card { text-align: center; }
 .restore-card p { margin: 6px 0 0; }
 .steps { padding-left: 20px; margin: 8px 0 0; display: grid; gap: 6px; }
+
+/* goal cards */
+.goal-list { display: grid; gap: 10px; }
+.goal-card input { position: absolute; opacity: 0; pointer-events: none; }
+.goal-inner {
+  display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 16px; cursor: pointer;
+  background: var(--card); border: 1.5px solid var(--line); color: var(--text); transition: border-color .15s, background .15s;
+}
+.goal-icon { width: 48px; height: 48px; flex: none; border-radius: 12px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); }
+.goal-text { display: grid; flex: 1; gap: 1px; }
+.goal-text b { font-size: 1.02rem; }
+.goal-text small { color: var(--muted); font-weight: 400; }
+.goal-mark { width: 22px; height: 22px; flex: none; display: grid; place-items: center; color: var(--muted); }
+.goal-mark::before { content: '›'; font-size: 1.5rem; line-height: 1; }
+.goal-card input:checked + .goal-inner { border-color: var(--primary); background: var(--primary-soft); }
+.goal-card input:checked + .goal-inner .goal-icon { background: var(--primary); color: var(--primary-ink); }
+.goal-card input:checked + .goal-inner .goal-mark { background: var(--primary); color: var(--primary-ink); border-radius: 99px; }
+.goal-card input:checked + .goal-inner .goal-mark::before { content: '✓'; font-size: .8rem; font-weight: 700; }
+.goal-card input:focus-visible + .goal-inner { outline: 2px solid var(--primary); outline-offset: 2px; }

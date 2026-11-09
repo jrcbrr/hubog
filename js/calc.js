@@ -8,7 +8,12 @@ export const ACTIVITY = {
   very: 1.9,        // physical job + training
 };
 
-export const GOAL_DELTA = { lose: -500, mild_lose: -250, maintain: 0, gain: 300 };
+// cut: ~0.5 kg/week loss · recomp: small deficit + high protein · lean_bulk: small surplus to limit fat gain
+export const GOAL_DELTA = { cut: -500, recomp: -200, maintain: 0, lean_bulk: 250 };
+export const PROTEIN_PER_KG = { cut: 2.0, recomp: 2.2, maintain: 1.6, lean_bulk: 1.8 };
+export const GOALS = ['cut', 'recomp', 'maintain', 'lean_bulk'];
+// goals used by earlier versions of Hubog
+export const LEGACY_GOAL = { lose: 'cut', mild_lose: 'cut', gain: 'lean_bulk' };
 
 // Mifflin-St Jeor BMR
 export function bmr({ sex, age, heightCm, weightKg }) {
@@ -21,7 +26,7 @@ export function tdee(p) { return bmr(p) * (ACTIVITY[p.activity] || 1.2); }
 export function targets(p) {
   const floor = p.sex === 'female' ? 1200 : 1500;
   const kcal = Math.max(floor, Math.round((tdee(p) + (GOAL_DELTA[p.goal] ?? 0)) / 10) * 10);
-  const proteinPerKg = p.goal === 'maintain' ? 1.6 : 1.8;
+  const proteinPerKg = PROTEIN_PER_KG[p.goal] ?? 1.6;
   const protein = Math.round(p.weightKg * proteinPerKg);
   const fat = Math.round((kcal * 0.27) / 9);
   const carbs = Math.max(0, Math.round((kcal - protein * 4 - fat * 9) / 4));

@@ -24,9 +24,11 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaults();
-    return { ...defaults(), ...JSON.parse(raw) };
+    return migrate({ ...defaults(), ...JSON.parse(raw) });
   } catch (e) {
     console.warn('Hubog: could not read saved data', e);
+    // Never overwrite data we couldn't read: keep a copy before starting fresh
+    try { const raw = localStorage.getItem(KEY); if (raw) localStorage.setItem(KEY + ':recovered-' + Date.now(), raw); } catch {}
     return defaults();
   }
 }
@@ -35,6 +37,14 @@ export function save() {
   try { localStorage.setItem(KEY, JSON.stringify(state)); }
   catch (e) { console.warn('Hubog: could not save', e); }
   listeners.forEach(fn => fn(state));
+}
+
+// Upgrade data saved by older versions.
+// (function declaration on purpose: it is hoisted, so load() can call it at startup)
+export function migrate(s) {
+  const legacyGoal = { lose: 'cut', mild_lose: 'cut', gain: 'lean_bulk' };
+  if (s.profile && legacyGoal[s.profile.goal]) s.profile.goal = legacyGoal[s.profile.goal];
+  return s;
 }
 
 export const get = () => state;
@@ -46,7 +56,7 @@ export function importJSON(text) {
   const data = JSON.parse(text);
   if (!data || typeof data !== 'object' || !('log' in data) || !('profile' in data)) throw new Error('Not a Hubog backup');
   const d = defaults();
-  state = { ...d, ...data, settings: { ...d.settings, ...data.settings, lastBackupAt: Date.now() } };
+  state = migrate({ ...d, ...data, settings: { ...d.settings, ...data.settings, lastBackupAt: Date.now() } });
   save();
 }
 export function resetAll() { state = defaults(); save(); }

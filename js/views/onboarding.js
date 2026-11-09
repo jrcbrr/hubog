@@ -1,8 +1,17 @@
 import * as store from '../store.js';
-import { targets, tdee } from '../calc.js';
+import { targets, tdee, GOALS } from '../calc.js';
 import { t, setLang, getLang, initLang } from '../i18n.js';
 import { esc, num, fmt, toast } from '../ui.js';
 import { restoreFromFile } from '../backup.js';
+
+// Simple line icons (24×24, stroke = currentColor)
+const svg = d => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const GOAL_ICONS = {
+  cut: svg('<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.5-5 3-6.5.3 2 1.2 3.2 2.5 3.7C11 8 11 5 12 2z"/>'),
+  recomp: svg('<path d="M4 8h14l-3-3M20 16H6l3 3"/>'),
+  maintain: svg('<path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M9 8.5c0-2 1.5-3.5 3-3.5M12 8V5.5c1.5 0 3 1 3 2.5"/>'),
+  lean_bulk: svg('<path d="M2.5 10v4M6 6.5v11M18 6.5v11M21.5 10v4M6 12h12"/>'),
+};
 
 export function renderOnboarding(root, { editing = false } = {}) {
   const p = store.get().profile || { sex: 'male', age: 18, heightCm: 165, weightKg: 60, activity: 'light', goal: 'maintain' };
@@ -40,9 +49,11 @@ export function renderOnboarding(root, { editing = false } = {}) {
           <label class="choice"><input type="radio" name="activity" value="${a}" ${p.activity === a ? 'checked' : ''}>
           <span><b>${t('act_' + a)}</b><small>${t('act_' + a + '_d')}</small></span></label>`).join('')}
       </div></fieldset>
-      <fieldset><legend>${t('goal')}</legend><div class="chips">
-        ${opt('goal', 'lose', t('goal_lose'), p.goal)}${opt('goal', 'mild_lose', t('goal_mild_lose'), p.goal)}
-        ${opt('goal', 'maintain', t('goal_maintain'), p.goal)}${opt('goal', 'gain', t('goal_gain'), p.goal)}
+      <fieldset><legend>${t('goal')}</legend><div class="goal-list">
+        ${GOALS.map(g => `<label class="goal-card"><input type="radio" name="goal" value="${g}" ${p.goal === g ? 'checked' : ''}>
+          <span class="goal-inner"><span class="goal-icon" aria-hidden="true">${GOAL_ICONS[g]}</span>
+          <span class="goal-text"><b>${t('goal_' + g)}</b><small>${t('goal_' + g + '_d')}</small></span>
+          <span class="goal-mark" aria-hidden="true"></span></span></label>`).join('')}
       </div></fieldset>
       <div id="preview" class="preview"></div>
       <button class="btn block" type="submit">${editing ? t('save') : t('start')}</button>

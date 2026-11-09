@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-globalThis.localStorage = { _d: {}, getItem(k) { return this._d[k] ?? null; }, setItem(k, v) { this._d[k] = v; } };
+globalThis.localStorage = { _d: { 'hubog:v1': JSON.stringify({ log: {}, profile: { goal: 'gain', sex: 'male', age: 20, heightCm: 170, weightKg: 70, activity: 'light' } }) }, getItem(k) { return this._d[k] ?? null; }, setItem(k, v) { this._d[k] = v; } };
 globalThis.window = { dispatchEvent() {} };
 globalThis.Event = class { constructor(n) { this.type = n; } };
 
@@ -16,6 +16,7 @@ const { fromOFF } = await import('../js/off.js');
 const store = await import('../js/store.js');
 
 let passed = 0;
+assert.equal(store.get().profile?.goal, 'lean_bulk', 'saved data from an older version must load and upgrade at startup');
 const test = (name, fn) => { fn(); passed++; console.log('✓', name); };
 
 test('BMR male (Mifflin-St Jeor)', () => {
@@ -25,7 +26,7 @@ test('targets add up and respect floor', () => {
   const t = calc.targets({ sex: 'male', age: 18, heightCm: 168, weightKg: 60, activity: 'light', goal: 'maintain' });
   const kcalFromMacros = t.protein * 4 + t.carbs * 4 + t.fat * 9;
   assert.ok(Math.abs(kcalFromMacros - t.kcal) < 15, `macros ${kcalFromMacros} vs ${t.kcal}`);
-  const low = calc.targets({ sex: 'female', age: 40, heightCm: 145, weightKg: 40, activity: 'sedentary', goal: 'lose' });
+  const low = calc.targets({ sex: 'female', age: 40, heightCm: 145, weightKg: 40, activity: 'sedentary', goal: 'cut' });
   assert.equal(low.kcal, 1200);
 });
 test('sumEntries uses qty', () => {
@@ -105,7 +106,7 @@ test('i18n: every used key exists in en and tl', () => {
   for (const f of files) for (const m of readFileSync(f, 'utf8').matchAll(/\bt\('([a-z0-9_]+)'/g)) used.add(m[1]);
   ['breakfast', 'lunch', 'dinner', 'snacks', 'male', 'female', 'protein', 'carbs', 'fat',
    ...['sedentary', 'light', 'moderate', 'active', 'very'].flatMap(a => ['act_' + a, 'act_' + a + '_d']),
-   ...['lose', 'mild_lose', 'maintain', 'gain'].map(g => 'goal_' + g),
+   ...['cut', 'recomp', 'maintain', 'lean_bulk'].flatMap(g => ['goal_' + g, 'goal_' + g + '_d']),
    ...['auto', 'light', 'dark'].map(x => 'theme_' + x), ...['search', 'favorites', 'mine'].map(x => 'tab_' + x),
    'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder', 'switch_1', 'switch_2', 'switch_3', 'switch_4'].forEach(k => used.add(k));
   ['act_', 'goal_', 'theme_', 'tab_', 'switch_'].forEach(k => used.delete(k));
@@ -137,6 +138,18 @@ test('backup: export then restore on a "new device" brings everything back', () 
   assert.throws(() => store.importJSON('{"hello":1}'));
   assert.throws(() => store.importJSON('not json'));
   assert.equal(store.get().profile.weightKg, 68, 'bad file must not wipe data');
+});
+
+test('goals: deficits/surpluses and protein per goal', () => {
+  const base = { sex: 'male', age: 20, heightCm: 170, weightKg: 70, activity: 'moderate' };
+  const k = g => calc.targets({ ...base, goal: g });
+  assert.ok(k('cut').kcal < k('recomp').kcal && k('recomp').kcal < k('maintain').kcal && k('maintain').kcal < k('lean_bulk').kcal);
+  assert.equal(k('recomp').protein, 154); assert.equal(k('cut').protein, 140); assert.equal(k('maintain').protein, 112);
+});
+test('goals: old saved goals are upgraded', () => {
+  for (const [old, now] of [['lose', 'cut'], ['mild_lose', 'cut'], ['gain', 'lean_bulk'], ['maintain', 'maintain']]) {
+    assert.equal(store.migrate({ profile: { goal: old } }).profile.goal, now);
+  }
 });
 
 console.log(`\n${passed} tests passed`);

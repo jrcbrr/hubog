@@ -1,5 +1,5 @@
 // Hubog service worker — caches the app so it works offline.
-const VERSION = 'hubog-v2';
+const VERSION = 'hubog-v3';
 const APP = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png',
   './js/app.js', './js/store.js', './js/calc.js', './js/foods.js', './js/off.js', './js/scan.js', './js/label.js',
