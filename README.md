@@ -12,6 +12,7 @@ It's plain HTML, CSS and JavaScript. There's no backend, no build step and no ac
 - Packaged food search through [Open Food Facts](https://world.openfoodfacts.org)
 - **Barcode scanning** with the phone camera (native `BarcodeDetector`, with `html5-qrcode` as the fallback on iPhone)
 - **Nutrition label scanning**: on-device OCR with Tesseract.js, then you confirm the numbers
+- **Nutrition filters**: High protein, Low carb, High carb, Low fat, High fat, Under 200 kcal, Fits my day (what's left of today's calories); sort by most protein, protein per calorie, fewest calories or carbs. Rules in `js/filters.js`
 - Quick add, custom foods, favorites, recent foods, and recipes (e.g. "Sinigang ni Lola" split into servings)
 - Water tracker
 

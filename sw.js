@@ -1,9 +1,9 @@
 // Hubog service worker — caches the app so it works offline.
-const VERSION = 'hubog-v7';
+const VERSION = 'hubog-v8';
 const APP = [
   './', './index.html', './css/style.css', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png',
   './js/app.js', './js/store.js', './js/calc.js', './js/foods.js', './js/off.js', './js/scan.js', './js/label.js',
-  './js/workouts.js', './js/ui.js', './js/i18n.js', './js/theme.js', './js/backup.js', './js/icons.js', './js/creatine.js', './js/restaurants.js', './js/imageprep.js', './fonts/poppins-medium.woff', './fonts/poppins-bold.woff',
+  './js/workouts.js', './js/ui.js', './js/i18n.js', './js/theme.js', './js/backup.js', './js/icons.js', './js/creatine.js', './js/restaurants.js', './js/imageprep.js', './js/filters.js', './fonts/poppins-medium.woff', './fonts/poppins-bold.woff',
   './js/views/onboarding.js', './js/views/today.js', './js/views/foodsheet.js', './js/views/add.js',
   './js/views/recipe.js', './js/views/workouts.js', './js/views/progress.js', './js/views/me.js',
 ];

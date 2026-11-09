@@ -226,10 +226,10 @@ export const BUILTIN = RAW.map(([id, name, serving, kcal, protein, carbs, fat, t
 
 const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-export function searchLocal(query, extra = []) {
+export function searchLocal(query, extra = [], limit = 40) {
   const q = norm(query.trim());
   const all = [...extra, ...BUILTIN, ...(q ? RESTAURANT_FOODS : [])];
-  if (!q) return all.slice(0, 30);
+  if (!q) return all.slice(0, limit === 40 ? 30 : limit);
   const words = q.split(/\s+/);
   return all
     .map(f => {
@@ -241,7 +241,7 @@ export function searchLocal(query, extra = []) {
     .filter(Boolean)
     .sort((a, b) => a.score - b.score)
     .map(x => x.f)
-    .slice(0, 40);
+    .slice(0, limit);
 }
 
 // Emoji for a food, from its name/tags. Keeps lists warm and easy to scan.

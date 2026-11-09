@@ -12,6 +12,7 @@ const { parseLabel, labelQuality } = await import('../js/label.js');
 const R = await import('../js/restaurants.js');
 const CR = await import('../js/creatine.js');
 const IP = await import('../js/imageprep.js');
+const FL = await import('../js/filters.js');
 const W = await import('../js/workouts.js');
 const { DICTS } = await import('../js/i18n.js');
 const { searchLocal, BUILTIN } = await import('../js/foods.js');
@@ -114,7 +115,7 @@ test('i18n: every used key exists in en and tl', () => {
    ...['cut', 'recomp', 'maintain', 'lean_bulk'].flatMap(g => ['goal_' + g, 'goal_' + g + '_d']),
    ...['auto', 'light', 'dark'].map(x => 'theme_' + x), ...['search', 'restaurants', 'favorites', 'mine'].map(x => 'tab_' + x),
    'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder', 'switch_1', 'switch_2', 'switch_3', 'switch_4', 'label_tip_1', 'label_tip_2', 'label_tip_3', 'label_tip_4'].forEach(k => used.add(k));
-  ['act_', 'goal_', 'theme_', 'tab_', 'switch_', 'label_tip_', 'tab_restaurants'].forEach(k => used.delete(k));
+  ['act_', 'goal_', 'theme_', 'tab_', 'switch_', 'label_tip_', 'tab_restaurants', 'f_', 's_'].forEach(k => used.delete(k));
   const missing = [...used].filter(k => !DICTS.en[k] || !DICTS.tl[k]);
   assert.deepEqual(missing, []);
   const extra = Object.keys(DICTS.en).filter(k => !DICTS.tl[k]);
@@ -223,6 +224,31 @@ test('creatine: streak, due time, calendar file', () => {
   assert.equal(CR.isDue(new Date(2026, 10, 10, 9, 0)), false);
   const ics = ICS;
   assert.match(ics, /DTSTART:\d{8}T214500/); assert.match(ics, /RRULE:FREQ=DAILY/); assert.match(ics, /BEGIN:VALARM/);
+});
+
+test('filters: foods are classified sensibly', () => {
+  const by = n => [...BUILTIN, ...R.RESTAURANT_FOODS].find(f => f.name === n);
+  const has = (n, k) => FL.FILTERS[k](by(n), { remaining: 500 });
+  assert.ok(has('Chicken breast, grilled (no skin)', 'high_protein') && has('Chicken breast, grilled (no skin)', 'low_carb') && has('Chicken breast, grilled (no skin)', 'low_fat'));
+  assert.ok(has('White rice (kanin)', 'high_carb') && has('White rice (kanin)', 'low_fat') && !has('White rice (kanin)', 'high_protein'));
+  assert.ok(has('Pork adobo', 'high_fat') && has('Pork adobo', 'low_carb'));
+  assert.ok(has('Whey protein', 'high_protein'));
+  assert.ok(!has('Black coffee', 'high_protein'), 'tiny items are not "high protein"');
+  assert.ok(!has('Jolly Spaghetti', 'high_protein') && has('2-pc Chickenjoy with rice', 'high_protein'), 'big plates need a real protein share');
+  assert.ok(has('Black coffee', 'fits_day') && !has('Double Whopper', 'fits_day'));
+  assert.ok(!FL.FILTERS.fits_day(by('Black coffee'), { remaining: -50 }), 'nothing fits when over budget');
+});
+test('filters: combine, opposites, sorting', () => {
+  const all = [...BUILTIN, ...R.RESTAURANT_FOODS];
+  const hp = FL.applyFilters(all, ['high_protein', 'low_carb'], 'protein');
+  assert.ok(hp.length > 10);
+  assert.ok(hp.every(f => FL.FILTERS.high_protein(f) && FL.FILTERS.low_carb(f)));
+  for (let i = 1; i < hp.length; i++) assert.ok(hp[i - 1].protein >= hp[i].protein);
+  assert.deepEqual(FL.toggleFilter(['low_carb', 'low_cal'], 'high_carb'), ['low_cal', 'high_carb']);
+  assert.deepEqual(FL.toggleFilter(['high_carb'], 'high_carb'), []);
+  const ppk = FL.applyFilters(all, [], 'protein_per_kcal');
+  assert.ok(ppk[0].protein / ppk[0].kcal >= ppk[5].protein / ppk[5].kcal);
+  assert.ok(FL.applyFilters(all, ['high_carb', 'high_protein']).length >= 0);
 });
 
 console.log(`\n${passed} tests passed`);

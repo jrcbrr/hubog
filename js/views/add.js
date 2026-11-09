@@ -1,16 +1,21 @@
 import * as store from '../store.js';
 import { searchLocal, BUILTIN, foodEmoji } from '../foods.js';
 import { ICON } from '../icons.js';
-import { RESTAURANTS, foodsOf } from '../restaurants.js';
+import { RESTAURANTS, RESTAURANT_FOODS, foodsOf } from '../restaurants.js';
+import { FILTERS, SORTS, applyFilters, toggleFilter } from '../filters.js';
+import { sumEntries } from '../calc.js';
+import { getTargets } from './today.js';
 import { searchOFF, lookupBarcode } from '../off.js';
 import { startBarcodeScan, readLabel } from '../scan.js';
 import { t } from '../i18n.js';
-import { esc, sheet, toast, num, fmt } from '../ui.js';
+import { esc, sheet, toast, num, fmt, fmt1 } from '../ui.js';
 import { openFoodSheet, defaultMeal, MEALS } from './foodsheet.js';
 import { recipeAsFood } from './recipe.js';
 
 let tab = 'search';
 let restaurant = RESTAURANTS[0].id;
+let filters = [];
+let sort = 'match';
 
 export function allMyFoods(st) {
   return [...st.customFoods, ...st.recipes.map(recipeAsFood)];
@@ -40,6 +45,14 @@ export function renderAdd(root, params) {
   <div class="tabs" role="tablist">
     ${['search', 'restaurants', 'favorites', 'mine'].map(k => `<button role="tab" class="${tab === k ? 'on' : ''}" data-tab="${k}">${t('tab_' + k)}</button>`).join('')}
   </div>
+  <div class="filter-bar">
+    <div class="filter-chips" role="group" aria-label="${t('filter_by')}">
+      ${Object.keys(FILTERS).map(k => `<button class="fchip ${filters.includes(k) ? 'on' : ''}" data-filter="${k}" aria-pressed="${filters.includes(k)}">${t('f_' + k)}</button>`).join('')}
+    </div>
+    <label class="sort-pick"><span>${t('sort_by')}</span>
+      <select data-sort>${Object.keys(SORTS).map(k => `<option value="${k}" ${sort === k ? 'selected' : ''}>${t('s_' + k)}</option>`).join('')}</select>
+    </label>
+  </div>
   <div id="results"></div>
   <div id="online"></div>`;
 
@@ -49,13 +62,19 @@ export function renderAdd(root, params) {
 
   const row = f => `<button class="food-row" data-id="${esc(f.id)}">
       <span class="tile" aria-hidden="true">${foodEmoji(f)}</span>
-      <span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving || '')}</small></span>
+      <span class="grow"><b>${esc(f.name)}</b><small class="muted">${esc(f.serving || '')}</small>
+        <small class="mini-macros"><i class="m-p">${fmt1(f.protein)}g P</i><i class="m-c">${fmt1(f.carbs)}g C</i><i class="m-f">${fmt1(f.fat)}g F</i></small></span>
       <span class="kcal">${f.source === 'restaurant' && !f.official ? '<small>≈ </small>' : ''}${fmt(f.kcal)}<small> kcal</small></span></button>`;
   const pool = new Map();
   const list = (items, empty) => {
     items.forEach(f => pool.set(f.id, f));
     return items.length ? items.map(row).join('') : `<p class="empty">${empty}</p>`;
   };
+
+  const ctx = { remaining: getTargets(st).kcal - sumEntries(st.log[date]).kcal };
+  const filtering = () => filters.length > 0 || sort !== 'match';
+  const F = items => applyFilters(items, filters, sort, ctx);
+  const countLine = n => filtering() ? `<p class="match-count small muted">${t('n_match', { n })}${filters.length ? ` <button class="link clear-f" data-clear>${t('clear_filters')}</button>` : ''}</p>` : '';
 
   let ctrl, timer;
   const draw = () => {
@@ -65,7 +84,7 @@ export function renderAdd(root, params) {
     online.innerHTML = '';
     if (tab === 'restaurants') {
       const r = RESTAURANTS.find(x => x.id === restaurant);
-      const items = foodsOf(restaurant).filter(f => !query || f.name.toLowerCase().includes(query.toLowerCase()));
+      const items = F(foodsOf(restaurant).filter(f => !query || f.name.toLowerCase().includes(query.toLowerCase())));
       results.innerHTML = `
         <div class="rest-tabs" role="tablist" aria-label="${t('tab_restaurants')}">
           ${RESTAURANTS.map(x => `<button role="tab" aria-selected="${x.id === restaurant}" class="rest-tab ${x.id === restaurant ? 'on' : ''}" data-rest="${x.id}">
@@ -73,21 +92,26 @@ export function renderAdd(root, params) {
             <span>${esc(x.name)}</span></button>`).join('')}
         </div>
         <p class="rest-note small muted">${t(r.items.some(i => i[6] === 'us') ? 'rest_note_mixed' : 'rest_note_est', { name: r.name })}</p>
-        ${list(items, t('no_results'))}`;
+        ${countLine(items.length)}${list(items, filtering() ? t('no_filter_match') : t('no_results'))}`;
       results.querySelectorAll('[data-rest]').forEach(b => b.onclick = e => {
         e.stopPropagation(); restaurant = b.dataset.rest; draw();
         results.querySelector('.rest-tab.on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
       });
     } else if (tab === 'favorites') {
-      const favs = s.favorites.map(id => findFood(s, id)).filter(Boolean)
-        .filter(f => !query || f.name.toLowerCase().includes(query.toLowerCase()));
-      results.innerHTML = list(favs, t('no_favorites'));
+      const favs = F(s.favorites.map(id => findFood(s, id)).filter(Boolean)
+        .filter(f => !query || f.name.toLowerCase().includes(query.toLowerCase())));
+      results.innerHTML = countLine(favs.length) + list(favs, filtering() && s.favorites.length ? t('no_filter_match') : t('no_favorites'));
     } else if (tab === 'mine') {
-      const items = mine.filter(f => !query || f.name.toLowerCase().includes(query.toLowerCase()));
-      results.innerHTML = list(items, t('no_my_foods')) +
+      const items = F(mine.filter(f => !query || f.name.toLowerCase().includes(query.toLowerCase())));
+      results.innerHTML = countLine(items.length) + list(items, filtering() && mine.length ? t('no_filter_match') : t('no_my_foods')) +
         `<a class="btn ghost block" href="#/recipe?date=${date}&meal=${meal}">+ ${t('new_recipe')}</a>`;
     } else {
-      if (!query && s.recents.length) {
+      if (filtering()) {
+        // Filters on: look through every food (yours, built-in, restaurants), not just the first page
+        const pool0 = query ? searchLocal(query, mine, Infinity) : [...mine, ...BUILTIN, ...RESTAURANT_FOODS];
+        const items = F(pool0).slice(0, 80);
+        results.innerHTML = countLine(F(pool0).length) + list(items, t('no_filter_match'));
+      } else if (!query && s.recents.length) {
         results.innerHTML = `<h4 class="list-head">${t('recent')}</h4>` + list(s.recents.slice(0, 12), '') +
           `<h4 class="list-head">${t('filipino_foods')}</h4>` + list(searchLocal('', []).slice(0, 15), '');
       } else {
@@ -101,7 +125,7 @@ export function renderAdd(root, params) {
           ctrl = new AbortController();
           try {
             const items = await searchOFF(query, ctrl.signal);
-            online.innerHTML = `<h4 class="list-head">${t('packaged_foods')}</h4>` + list(items, t('no_results'));
+            online.innerHTML = `<h4 class="list-head">${t('packaged_foods')}</h4>` + list(F(items), t('no_results'));
           } catch (e) {
             if (e.name !== 'AbortError') online.innerHTML = `<p class="empty">${t('search_failed')}</p>`;
           }
@@ -110,6 +134,19 @@ export function renderAdd(root, params) {
     }
   };
   q.oninput = draw;
+  root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => {
+    filters = toggleFilter(filters, b.dataset.filter);
+    root.querySelectorAll('[data-filter]').forEach(x => { const on = filters.includes(x.dataset.filter); x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    draw();
+  });
+  root.querySelector('[data-sort]').onchange = e => { sort = e.target.value; draw(); };
+  results.addEventListener('click', e => {
+    if (!e.target.closest('[data-clear]')) return;
+    filters = []; sort = 'match';
+    root.querySelectorAll('[data-filter]').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', false); });
+    root.querySelector('[data-sort]').value = 'match';
+    draw();
+  });
   root.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; renderAdd(root, params); });
   // handlers live on elements re-created each render, so they never stack up
   results.onclick = online.onclick = e => {

@@ -86,6 +86,10 @@ const en = {
   reminder_note: "Hubog's notification shows while the app is open. For a reminder when Hubog is closed, add it to your calendar.",
   creatine_notif_title: 'Creatine time', creatine_notif_body: 'Take your {g} g of creatine today.',
   creatine_prompt: 'Taking creatine? Get a daily reminder and a streak on your Today screen.', set_reminder: 'Set reminder', no_thanks: 'No thanks',
+  filter_by: 'Filter by nutrition', sort_by: 'Sort', f_high_protein: 'High protein', f_low_carb: 'Low carb', f_high_carb: 'High carb',
+  f_low_fat: 'Low fat', f_high_fat: 'High fat', f_low_cal: 'Under 200 kcal', f_fits_day: 'Fits my day',
+  s_match: 'Best match', s_protein: 'Most protein', s_protein_per_kcal: 'Protein per calorie', s_kcal_low: 'Fewest calories', s_carbs_low: 'Fewest carbs',
+  n_match: '{n} foods', clear_filters: 'Clear filters', no_filter_match: 'No foods match these filters. Try removing one.',
   made_by: 'Made by',
   error: 'Something went wrong',
 };
@@ -175,6 +179,10 @@ const tl = {
   reminder_note: 'Lumalabas ang notification ng Hubog habang bukas ang app. Para may paalala kahit sarado ang Hubog, idagdag ito sa calendar mo.',
   creatine_notif_title: 'Oras na ng creatine', creatine_notif_body: 'Inumin ang {g} g na creatine mo ngayon.',
   creatine_prompt: 'Umiinom ka ba ng creatine? Magkaroon ng araw-araw na paalala at streak sa Ngayon screen.', set_reminder: 'Mag-set ng paalala', no_thanks: 'Huwag na',
+  filter_by: 'Salain ayon sa nutrisyon', sort_by: 'Ayusin', f_high_protein: 'Mataas sa protina', f_low_carb: 'Mababa sa carbs', f_high_carb: 'Mataas sa carbs',
+  f_low_fat: 'Mababa sa taba', f_high_fat: 'Mataas sa taba', f_low_cal: 'Wala pang 200 kcal', f_fits_day: 'Kasya pa sa araw ko',
+  s_match: 'Pinakatugma', s_protein: 'Pinakamaraming protina', s_protein_per_kcal: 'Protina kada calorie', s_kcal_low: 'Pinakakaunting calories', s_carbs_low: 'Pinakakaunting carbs',
+  n_match: '{n} pagkain', clear_filters: 'Alisin ang filters', no_filter_match: 'Walang pagkaing tugma. Subukang mag-alis ng isang filter.',
   made_by: 'Gawa ni',
   error: 'May nagkaproblema',
 };

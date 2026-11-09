@@ -448,3 +448,20 @@ label.check-me { color: var(--c); }
 .credit a { display: inline-flex; align-items: center; gap: 5px; color: var(--mangga); text-decoration: none; padding: 4px 0; }
 .credit a .ic { width: 15px; height: 15px; }
 .credit a:hover span, .credit a:focus-visible span { text-decoration: underline; }
+
+/* nutrition filters */
+.filter-bar { display: grid; gap: 8px; margin: 4px 0 6px; }
+.filter-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.fchip {
+  flex: none; border: 1.5px solid var(--line); background: var(--card); color: var(--text); border-radius: 99px;
+  padding: 7px 13px; font: 500 .82rem var(--display); cursor: pointer; white-space: nowrap;
+}
+.fchip.on { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.fchip.on::before { content: '✓ '; }
+.sort-pick { display: flex; align-items: center; gap: 8px; justify-content: flex-end; font-size: .82rem; }
+.sort-pick select { width: auto; min-height: 36px; padding: 5px 30px 5px 10px; font-size: .85rem; border-radius: 10px; background-color: var(--card); }
+.match-count { margin: 6px 2px 2px; display: flex; gap: 10px; align-items: center; }
+.clear-f { color: var(--primary); font-weight: 600; padding: 0; }
+.mini-macros { display: flex; gap: 8px; font-size: .74rem !important; margin-top: 1px; }
+.mini-macros i { font-style: normal; font-weight: 600; }
