@@ -253,7 +253,7 @@ const EMOJI_RULES = [
   [/sinigang|tinola|bulalo|nilaga|soup|lomi|arroz caldo|lugaw|porridge/, '🍲'],
   [/pancit|noodle|canton|bihon|spaghetti|pasta/, '🍜'],
   [/fish|bangus|tilapia|tuyo|sardine|tuna|isda|paksiw/, '🐟'], [/shrimp|hipon/, '🦐'],
-  [/chicken|chickenjoy|manok|inasal|afritada|pecho|paa\b|mcdo\b|tenders|nuggets|zinger/, '🍗'], [/beef|baka|tapa|bistek|caldereta|kare-kare|oxtail/, '🥩'],
+  [/chicken|chickenjoy|manok|inasal|afritada|pecho|paa\b|tenders|nuggets|zinger/, '🍗'], [/beef|baka|tapa|bistek|caldereta|kare-kare|oxtail/, '🥩'],
   [/pork|baboy|lechon|sisig|liempo|longganisa|tocino|menudo|bicol|hotdog|luncheon|spam|bbq/, '🍖'],
   [/burger|whopper|big mac|baconator|dave's|quarter pounder|mcchicken|sandwich|filet/, '🍔'], [/fries/, '🍟'], [/siomai|dumpling|siopao|bun/, '🥟'], [/lumpia|spring roll|turon/, '🌯'],
   [/mango|mangga/, '🥭'], [/banana|saging|lakatan|saba/, '🍌'], [/pineapple/, '🍍'], [/apple/, '🍎'], [/papaya|fruit/, '🍈'],
