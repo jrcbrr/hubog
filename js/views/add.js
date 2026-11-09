@@ -23,11 +23,12 @@ export function renderAdd(root, params) {
   const date = params.get('date') || store.todayKey();
   const meal = params.get('meal') || defaultMeal();
   const st = store.get();
-  const after = () => { location.hash = `#/today?date=${date}`; };
+  const dayHash = date === store.todayKey() ? '#/today' : `#/today?date=${date}`;
+  const after = () => { location.hash = dayHash; };
   const open = f => openFoodSheet(f, { date, meal, onDone: after });
 
   root.innerHTML = `
-  <header class="page-head"><a class="icon-btn" href="#/today?date=${date}" aria-label="${t('back')}">${ICON.chevL}</a>
+  <header class="page-head"><a class="icon-btn" href="${dayHash}" aria-label="${t('back')}">${ICON.chevL}</a>
     <h2>${t('add_to')} ${t(meal)}</h2></header>
   <div class="tools">
     <button class="tool" data-act="barcode"><span class="ti">${ICON.barcode}</span>${t('scan_barcode')}</button>

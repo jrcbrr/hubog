@@ -49,7 +49,7 @@ export function renderToday(root, params) {
   <header class="day-nav">
     <a class="icon-btn" href="#/today?date=${store.shiftDay(date, -1)}" aria-label="${t('prev_day')}">${ICON.chevL}</a>
     <div class="center"><b>${isToday ? t('today') : dateLabel(date)}</b>${strk ? `<small class="streak">${ICON.flame} ${strk} ${t('day_streak')}</small>` : ''}</div>
-    <a class="icon-btn ${isToday ? 'disabled' : ''}" href="${isToday ? '#/today' : '#/today?date=' + store.shiftDay(date, 1)}" aria-label="${t('next_day')}">${ICON.chevR}</a>
+    <a class="icon-btn ${isToday ? 'disabled' : ''}" href="${isToday ? '#/today' : store.shiftDay(date, 1) === store.todayKey() ? '#/today' : '#/today?date=' + store.shiftDay(date, 1)}" aria-label="${t('next_day')}">${ICON.chevR}</a>
   </header>
     <div class="ring-wrap">${ring(tot.kcal, tg.kcal, { size: 200, stroke: 16, label: fmt(Math.abs(left)), sub: left >= 0 ? t('kcal_left') : t('kcal_over'), over: left < 0 })}</div>
     <div class="hero-split"><span>${t('eaten')}<b>${fmt(tot.kcal)}</b></span><span>${t('goal')}<b>${fmt(tg.kcal)}</b></span></div>

@@ -63,6 +63,24 @@ requestPersistentStorage();
 window.addEventListener('hashchange', route);
 window.addEventListener('hubog:lang', route);
 route();
+
+// New day: if Hubog is left open (or comes back from the background) after midnight,
+// refresh so Today shows the new day's empty meals instead of yesterday's.
+let shownDay = store.todayKey();
+function checkNewDay() {
+  const now = store.todayKey();
+  if (now === shownDay) return;
+  const was = shownDay;
+  shownDay = now;
+  const [path, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
+  const d = new URLSearchParams(query).get('date');
+  const onToday = (path === '' || path === 'today') && (!d || d === was);
+  if (!onToday || document.querySelector('.sheet-wrap')) return;
+  if (d) location.hash = '#/today'; else route();
+}
+setInterval(checkNewDay, 30_000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewDay(); });
+
 startReminderLoop({ title: t('creatine_notif_title'), body: g => t('creatine_notif_body', { g }) });
 
 // Offline support
