@@ -16,6 +16,7 @@ const defaults = () => ({
   activePlan: null,
   activeSession: null,
   creatineLog: {},
+  activities: {},   // { 'YYYY-MM-DD': [{ id, type, minutes, km, kcal, estimated, note }] }
 });
 
 let state = load();

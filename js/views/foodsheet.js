@@ -88,6 +88,7 @@ export function openFoodSheet(food, { date = store.todayKey(), meal = defaultMea
       }
     });
     e.currentTarget.classList.toggle('on');
+    e.currentTarget.classList.remove('just'); void e.currentTarget.offsetWidth; e.currentTarget.classList.add('just');
   });
 
   s.el.querySelector('[data-del]')?.addEventListener('click', () => {

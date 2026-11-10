@@ -13,6 +13,7 @@ const R = await import('../js/restaurants.js');
 const CR = await import('../js/creatine.js');
 const IP = await import('../js/imageprep.js');
 const FL = await import('../js/filters.js');
+const AC = await import('../js/activities.js');
 const W = await import('../js/workouts.js');
 const { DICTS } = await import('../js/i18n.js');
 const { searchLocal, BUILTIN } = await import('../js/foods.js');
@@ -115,7 +116,7 @@ test('i18n: every used key exists in en and tl', () => {
    ...['cut', 'recomp', 'maintain', 'lean_bulk'].flatMap(g => ['goal_' + g, 'goal_' + g + '_d']),
    ...['auto', 'light', 'dark'].map(x => 'theme_' + x), ...['search', 'restaurants', 'favorites', 'mine'].map(x => 'tab_' + x),
    'prog_add_weight', 'prog_same_weight', 'prog_add_rep', 'prog_harder', 'switch_1', 'switch_2', 'switch_3', 'switch_4', 'label_tip_1', 'label_tip_2', 'label_tip_3', 'label_tip_4'].forEach(k => used.add(k));
-  ['act_', 'goal_', 'theme_', 'tab_', 'switch_', 'label_tip_', 'tab_restaurants', 'f_', 's_'].forEach(k => used.delete(k));
+  ['act_', 'goal_', 'theme_', 'tab_', 'switch_', 'label_tip_', 'tab_restaurants', 'f_', 's_', 'act_t_'].forEach(k => used.delete(k));
   const missing = [...used].filter(k => !DICTS.en[k] || !DICTS.tl[k]);
   assert.deepEqual(missing, []);
   const extra = Object.keys(DICTS.en).filter(k => !DICTS.tl[k]);
@@ -249,6 +250,28 @@ test('filters: combine, opposites, sorting', () => {
   const ppk = FL.applyFilters(all, [], 'protein_per_kcal');
   assert.ok(ppk[0].protein / ppk[0].kcal >= ppk[5].protein / ppk[5].kcal);
   assert.ok(FL.applyFilters(all, ['high_carb', 'high_protein']).length >= 0);
+});
+
+test('exercise: calorie estimates are sensible', () => {
+  const e = (type, minutes, km, weightKg = 70) => AC.estimateBurn({ type, minutes, km, weightKg });
+  // 1 h cycling at 20 km/h, 70 kg: (8-1)*70*1 = 490
+  assert.equal(e('cycling', 60, 20), 490);
+  assert.ok(e('cycling', 60, 30) > e('cycling', 60, 20), 'faster ride burns more');
+  assert.ok(e('cycling', 60, 0) > 0, 'works without distance');
+  // 30 min run at 10 km/h, 70 kg: MET 10.2 -> (9.2)*70*0.5 = 322
+  assert.equal(e('running', 30, 5), 322);
+  assert.ok(e('walking', 60, 5) < e('running', 60, 10));
+  assert.ok(e('running', 60, 10, 90) > e('running', 60, 10, 60), 'heavier person burns more');
+  assert.equal(e('yoga', 0, 0), 0);
+  assert.equal(AC.pace(30, 5), '6:00'); assert.equal(AC.pace(25, 4), '6:15');
+  assert.equal(Math.round(AC.speedKmh(90, 30)), 20);
+});
+test('exercise: burned calories add to the goal only when enabled', () => {
+  const st = { activities: { '2026-11-10': [{ kcal: 300 }, { kcal: 150 }] } };
+  assert.equal(AC.burnedOn(st, '2026-11-10'), 450);
+  assert.equal(AC.burnedOn(st, '2026-11-09'), 0);
+  assert.equal(AC.effectiveGoal(2000, 450, true), 2450);
+  assert.equal(AC.effectiveGoal(2000, 450, false), 2000);
 });
 
 console.log(`\n${passed} tests passed`);

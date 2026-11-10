@@ -7,6 +7,12 @@ import { backupDue, saveBackup, snoozeBackup } from '../backup.js';
 import { cfg as creatineCfg, takenOn, toggleTaken, creatineStreak, isDue } from '../creatine.js';
 import { foodEmoji } from '../foods.js';
 import { ICON, MEAL_EMOJI } from '../icons.js';
+import { activityById, burnedOn, effectiveGoal } from '../activities.js';
+import { openActivitySheet } from './activitysheet.js';
+import { playCounts, playRings, burst } from '../ui.js';
+
+// What the hero showed last time, so numbers and the ring animate from there instead of from zero
+let last = null;
 
 const CREDIT = { name: 'John Rudolph Cabrera', email: 'johnrudolph2010@gmail.com', instagram: 'jrcbrr_' };
 
@@ -19,7 +25,15 @@ export function renderToday(root, params) {
   const entries = st.log[date] || [];
   const tot = sumEntries(entries);
   const tg = getTargets(st);
-  const left = tg.kcal - tot.kcal;
+  const burned = burnedOn(st, date);
+  const addEx = st.settings.addExercise !== false;
+  const goal = effectiveGoal(tg.kcal, burned, addEx);
+  const left = goal - tot.kcal;
+  const acts = st.activities?.[date] || [];
+  const from = last && last.date === date ? last : { eaten: 0, burned: 0, left: goal, pct: 0 };
+  const pct = goal > 0 ? Math.min(1, tot.kcal / goal) : 0;
+  last = { date, eaten: tot.kcal, burned, left, pct };
+  const cnt = (to, prev) => `<span data-count="${Math.round(to)}" data-from="${Math.round(prev)}">${fmt(prev)}</span>`;
   const water = st.water[date] || 0;
   const wGoal = st.settings.waterGoalMl || 2000;
   const strk = streak(st.log, store.todayKey(), store.shiftDay);
@@ -51,8 +65,12 @@ export function renderToday(root, params) {
     <div class="center"><b>${isToday ? t('today') : dateLabel(date)}</b>${strk ? `<small class="streak">${ICON.flame} ${strk} ${t('day_streak')}</small>` : ''}</div>
     <a class="icon-btn ${isToday ? 'disabled' : ''}" href="${isToday ? '#/today' : store.shiftDay(date, 1) === store.todayKey() ? '#/today' : '#/today?date=' + store.shiftDay(date, 1)}" aria-label="${t('next_day')}">${ICON.chevR}</a>
   </header>
-    <div class="ring-wrap">${ring(tot.kcal, tg.kcal, { size: 200, stroke: 16, label: fmt(Math.abs(left)), sub: left >= 0 ? t('kcal_left') : t('kcal_over'), over: left < 0 })}</div>
-    <div class="hero-split"><span>${t('eaten')}<b>${fmt(tot.kcal)}</b></span><span>${t('goal')}<b>${fmt(tg.kcal)}</b></span></div>
+    <div class="ring-wrap">${ring(tot.kcal, goal, { size: 200, stroke: 16, label: fmt(Math.abs(from.left)), count: [Math.abs(from.left), Math.abs(left)], fromPct: from.pct, sub: left >= 0 ? t('kcal_left') : t('kcal_over'), over: left < 0 })}</div>
+    <div class="hero-split">
+      <span>${t('eaten')}<b>${cnt(tot.kcal, from.eaten)}</b></span>
+      <span>${t('burned')}<b>${burned ? '+' : ''}${cnt(burned, from.burned)}</b></span>
+      <span>${t('goal')}<b>${fmt(goal)}</b></span>
+    </div>
     <div class="macros">
       ${[['protein', 'm-p'], ['carbs', 'm-c'], ['fat', 'm-f']].map(([k, c]) => `
         <div class="macro"><div class="lbl">${t(k)}</div><div class="val">${fmt(tot[k])}<small> / ${tg[k]}g</small></div>${bar(tot[k], tg[k], c)}</div>`).join('')}
@@ -74,6 +92,20 @@ export function renderToday(root, params) {
     ${bar(water, wGoal, 'm-w')}
   </section>
 
+  <section class="card exercise-card">
+    <div class="meal-head"><span class="em" aria-hidden="true">🔥</span><h3>${t('exercise')}</h3>${burned ? `<span class="num burn">−${fmt(burned)} kcal</span>` : ''}</div>
+    ${acts.map(a => {
+      const def = activityById(a.type);
+      const bits = [`${a.minutes} min`, a.km ? `${fmt1(a.km)} km` : '', a.note ? esc(a.note) : ''].filter(Boolean).join(', ');
+      return `<button class="entry" data-act="${a.id}">
+        <span class="tile act-tile" aria-hidden="true">${def.emoji}</span>
+        <span class="grow"><b>${t('act_t_' + def.id)}</b><small class="muted">${bits}</small></span>
+        <span class="kcal burn">${a.estimated ? '<small>≈ </small>' : ''}${fmt(a.kcal)}</span></button>`;
+    }).join('')}
+    <button class="add-link" data-add-act><span class="tile">${ICON.plus}</span>${t('add_exercise')}</button>
+    ${burned && !addEx ? `<p class="small muted">${t('ex_not_added')}</p>` : ''}
+  </section>
+
   ${creatineCfg(st).on ? (() => {
     const taken = takenOn(date, st);
     const cs = creatineStreak(st.creatineLog || {}, store.todayKey(), store.shiftDay);
@@ -88,6 +120,12 @@ export function renderToday(root, params) {
   ${MEALS.map(mealBlock).join('')}
   `;
 
+  playRings(root);
+  playCounts(root);
+  root.querySelector('[data-add-act]').onclick = () => openActivitySheet({ date, onDone: () => renderToday(root, params) });
+  root.querySelectorAll('[data-act]').forEach(b => b.onclick = () => {
+    openActivitySheet({ date, entry: acts.find(a => a.id === b.dataset.act), onDone: () => renderToday(root, params) });
+  });
   root.querySelectorAll('[data-entry]').forEach(b => b.onclick = () => {
     const e = entries.find(x => x.id === b.dataset.entry);
     openFoodSheet({ id: e.foodId, name: e.name, serving: e.serving, kcal: e.kcal, protein: e.protein, carbs: e.carbs, fat: e.fat },
@@ -103,11 +141,15 @@ export function renderToday(root, params) {
     toggleTaken(date);
     if (!was) toast(t('creatine_logged'));
     renderToday(root, params);
+    if (!was) { root.querySelector('.supp-icon')?.classList.add('just'); burst(root.querySelector('.supp-icon'), '✨', 6); }
   });
   root.querySelectorAll('[data-water]').forEach(b => b.onclick = () => {
     const before = water;
     store.update(s => { s.water[date] = Math.max(0, (s.water[date] || 0) + Number(b.dataset.water)); });
-    if (before < wGoal && store.get().water[date] >= wGoal) toast(t('water_done'));
+    const reached = before < wGoal && store.get().water[date] >= wGoal;
+    if (reached) toast(t('water_done'));
     renderToday(root, params);
+    root.querySelector('.water-icon')?.classList.add('pop');
+    if (reached) burst(root.querySelector('.water-icon'), '💧');
   });
 }

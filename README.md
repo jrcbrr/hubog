@@ -16,6 +16,12 @@ It's plain HTML, CSS and JavaScript. There's no backend, no build step and no ac
 - Quick add, custom foods, favorites, recent foods, and recipes (e.g. "Sinigang ni Lola" split into servings)
 - Water tracker
 
+**Exercise / calories burned**
+- Log cycling, running, walking, hiking, swimming, strength training, basketball, football, volleyball, badminton, jump rope, boxing, dancing, yoga or other
+- Type the calories from your watch, bike computer or app, or let Hubog estimate them: (MET − 1) × weight × hours, with speed-based METs for cycling, running and walking (`js/activities.js`)
+- Shows speed and running pace; burned calories are added to the day's goal (can be turned off in Me)
+- Finishing a gym workout offers to log its calories
+
 **Workouts**
 - 4 preset plans: Beginner Full Body, Home (no equipment), Push/Pull/Legs, Dumbbells Only
 - Set/rep/weight logging, automatic rest timer, exercise tips
@@ -24,7 +30,7 @@ It's plain HTML, CSS and JavaScript. There's no backend, no build step and no ac
 
 **Progress and app**
 - Streaks, days on target, 7/30-day calorie chart, average macros, weight trend chart, BMI
-- English and Tagalog, light and dark theme
+- English and Tagalog, light and dark theme (white + blue "Manila Bay" design), animated screens, ring and numbers
 - Installable PWA that works offline
 - **Move to a new phone**: "Save backup" shares a file (Drive, Messenger, email) or downloads it; "Restore from backup" is on the welcome screen and in Me. Weekly backup reminder; asks the browser for persistent storage so data isn't auto-cleared
 

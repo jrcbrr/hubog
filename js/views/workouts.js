@@ -1,9 +1,10 @@
 import * as store from '../store.js';
 import { PLANS, planById, nextDay, lastPerformance, suggest } from '../workouts.js';
 import { t, dateLabel } from '../i18n.js';
-import { esc, sheet, toast, confirmSheet, num } from '../ui.js';
+import { esc, sheet, toast, confirmSheet, num, burst } from '../ui.js';
 import { ICON } from '../icons.js';
 import { cfg as creatineCfg } from '../creatine.js';
+import { openActivitySheet } from './activitysheet.js';
 
 let restTimer = null;
 
@@ -17,6 +18,11 @@ export function renderWorkouts(root) {
 
   root.innerHTML = `
   <header class="page-head"><h2>${t('workouts')}</h2></header>
+  <button class="cardio-cta" data-cardio>
+    <span class="cardio-emojis" aria-hidden="true">🚴🏃🚶🏊</span>
+    <span class="grow"><b>${t('log_cardio')}</b><small>${t('log_cardio_d')}</small></span>
+    <span class="cardio-plus">${ICON.plus}</span>
+  </button>
   ${plan ? (() => {
     const day = nextDay(plan, st.sessions);
     return `<section class="plan-hero">
@@ -56,6 +62,7 @@ export function renderWorkouts(root) {
 
   root.querySelector('[data-cr-hide]')?.addEventListener('click', () => { store.update(s => { s.settings.creatinePromptHidden = true; }); renderWorkouts(root); });
   root.querySelector('[data-cr-go]')?.addEventListener('click', () => setTimeout(() => document.getElementById('supplements')?.scrollIntoView({ block: 'start' }), 80));
+  root.querySelector('[data-cardio]').onclick = () => openActivitySheet({ onDone: () => toast(t('see_today')) });
   root.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => { store.update(s => { s.activePlan = b.dataset.plan; }); toast(t('plan_set')); renderWorkouts(root); window.scrollTo(0, 0); });
   root.querySelectorAll('[data-start]').forEach(b => b.onclick = () => startSession(plan, b.dataset.start, root));
   root.querySelectorAll('[data-hist]').forEach(b => b.onclick = () => historySheet(st.sessions.find(s => s.id === b.dataset.hist), root));
@@ -123,6 +130,7 @@ function renderSession(root) {
     });
     if (nowDone) { startRest(root, ses.exercises[a].rest); navigator.vibrate?.(30); }
     renderSession(root);
+    if (nowDone) root.querySelector(`[data-done="${a}:${b}"]`)?.classList.add('just');
   });
   root.querySelectorAll('[data-addset]').forEach(b => b.onclick = () => { upd(x => { const e = x.exercises[b.dataset.addset]; const l = e.sets[e.sets.length - 1]; e.sets.push({ kg: l.kg, reps: l.reps, done: false }); }); renderSession(root); });
   root.querySelectorAll('[data-rmset]').forEach(b => b.onclick = () => { upd(x => { x.exercises[b.dataset.rmset].sets.pop(); }); renderSession(root); });
@@ -134,9 +142,14 @@ function renderSession(root) {
     const any = store.get().activeSession.exercises.some(e => e.sets.some(s => s.done));
     if (!any) { toast(t('mark_a_set')); return; }
     stopRest(root);
+    const minutes = Math.max(1, Math.round((Date.now() - store.get().activeSession.startedAt) / 60000));
+    const dayName = store.get().activeSession.dayName;
     store.update(s => { s.sessions.push({ ...s.activeSession, finishedAt: Date.now() }); s.activeSession = null; });
     toast(t('workout_saved'));
     renderWorkouts(root);
+    burst(root.querySelector('.page-head h2'), '💪', 8);
+    // Offer to count the calories this session burned (estimate prefilled, or type your watch's number)
+    openActivitySheet({ prefill: { type: 'strength', minutes, note: dayName }, onDone: () => renderWorkouts(root) });
   };
   root.querySelector('[data-cancel]').onclick = async () => {
     if (!await confirmSheet(t('discard_q'), t('discard'), t('cancel'))) return;

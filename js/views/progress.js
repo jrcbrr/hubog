@@ -3,6 +3,7 @@ import { sumEntries, streak, bmi } from '../calc.js';
 import { t, dateLabel, shortDay } from '../i18n.js';
 import { esc, lineChart, barChart, fmt, fmt1, sheet, toast, num } from '../ui.js';
 import { getTargets } from './today.js';
+import { burnedOn } from '../activities.js';
 
 let range = 7;
 
@@ -21,6 +22,8 @@ export function renderProgress(root) {
   const workouts = st.sessions.filter(s => s.finishedAt && s.date >= days[0]).length;
   const strk = streak(st.log, today, store.shiftDay);
   const waterDays = days.filter(d => (st.water[d] || 0) >= (st.settings.waterGoalMl || 2000)).length;
+  const burnedTotal = days.reduce((a, d) => a + burnedOn(st, d), 0);
+  const activeDays = days.filter(d => (st.activities?.[d] || []).length).length;
 
   root.innerHTML = `
   <header class="page-head"><h2>${t('progress')}</h2>
@@ -31,6 +34,7 @@ export function renderProgress(root) {
     <div class="stat"><b>${logged.length}/${range}</b><small>${t('days_logged')}</small></div>
     <div class="stat"><b>${onTarget}</b><small>${t('days_on_target')}</small></div>
     <div class="stat"><b>${workouts}</b><small>${t('workouts')}</small></div>
+    <div class="stat burn-stat"><b>${fmt(burnedTotal)}</b><small>${t('kcal_burned_n', { n: activeDays })}</small></div>
     <div class="stat"><b>${waterDays}</b><small>${t('water_goal_days')}</small></div>
     <div class="stat"><b>${latest ? fmt1(bmi(latest.kg, st.profile.heightCm)) : '–'}</b><small>BMI</small></div>
   </div>

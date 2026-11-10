@@ -50,16 +50,56 @@ export function confirmSheet(message, okLabel, cancelLabel) {
 }
 
 /** Circular progress ring as SVG. */
-export function ring(value, max, { size = 168, stroke = 14, label = '', sub = '', over = false } = {}) {
+export function ring(value, max, { size = 168, stroke = 14, label = '', sub = '', over = false, fromPct = null, count = null } = {}) {
   const r = (size - stroke) / 2, c = 2 * Math.PI * r;
   const pct = max > 0 ? Math.min(1, value / max) : 0;
+  const start = fromPct == null ? pct : fromPct;
   return `<svg class="ring ${over ? 'over' : ''}" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="${esc(label)} ${esc(sub)}">
     <circle cx="${size / 2}" cy="${size / 2}" r="${r}" class="ring-bg" stroke-width="${stroke}" fill="none"/>
     <circle cx="${size / 2}" cy="${size / 2}" r="${r}" class="ring-fg" stroke-width="${stroke}" fill="none"
-      stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct)}" stroke-linecap="round" transform="rotate(-90 ${size / 2} ${size / 2})"/>
-    <text x="50%" y="47%" text-anchor="middle" class="ring-num">${esc(label)}</text>
+      stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - start)}" data-to="${c * (1 - pct)}" stroke-linecap="round" transform="rotate(-90 ${size / 2} ${size / 2})"/>
+    <text x="50%" y="47%" text-anchor="middle" class="ring-num" ${count ? `data-from="${Math.round(count[0])}" data-count="${Math.round(count[1])}"` : ''}>${esc(label)}</text>
     <text x="50%" y="62%" text-anchor="middle" class="ring-sub">${esc(sub)}</text>
   </svg>`;
+}
+
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Move rings from where they were drawn (data-from) to their real value (data-to). */
+export function playRings(root) {
+  const rings = root.querySelectorAll('.ring-fg[data-to]');
+  if (reduceMotion()) { rings.forEach(el => el.setAttribute('stroke-dashoffset', el.dataset.to)); return; }
+  requestAnimationFrame(() => requestAnimationFrame(() => rings.forEach(el => el.setAttribute('stroke-dashoffset', el.dataset.to))));
+}
+
+/** Count numbers up/down from data-from to data-count. */
+export function playCounts(root, ms = 700) {
+  root.querySelectorAll('[data-count]').forEach(el => {
+    const from = Number(el.dataset.from) || 0, to = Number(el.dataset.count) || 0;
+    if (from === to || reduceMotion()) { el.textContent = fmt(to); return; }
+    const t0 = performance.now();
+    const step = now => {
+      const p = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (p < 1 && el.isConnected) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+/** A few emoji float out from an element (water goal, workout done…). */
+export function burst(el, emoji = '✨', n = 8) {
+  if (!el || reduceMotion()) return;
+  const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span');
+    const a = (Math.PI * 2 * i) / n + Math.random() * 0.5, d = 40 + Math.random() * 40;
+    s.className = 'burst'; s.textContent = emoji;
+    s.style.left = cx - 10 + 'px'; s.style.top = cy - 10 + 'px';
+    s.style.setProperty('--dx', Math.cos(a) * d + 'px'); s.style.setProperty('--dy', Math.sin(a) * d - 20 + 'px');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 950);
+  }
 }
 
 export function bar(value, max, cls = '') {

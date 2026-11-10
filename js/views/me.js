@@ -47,6 +47,7 @@ export function renderMe(root) {
     <label>${t('language')}<select data-lang><option value="en" ${getLang() === 'en' ? 'selected' : ''}>English</option><option value="tl" ${getLang() === 'tl' ? 'selected' : ''}>Tagalog</option></select></label>
     <label>${t('theme')}<select data-theme>${['auto', 'light', 'dark'].map(v => `<option value="${v}" ${st.settings.theme === v ? 'selected' : ''}>${t('theme_' + v)}</option>`).join('')}</select></label>
     <label>${t('water_goal')} (ml)<input data-water type="number" min="500" step="250" value="${st.settings.waterGoalMl}"></label>
+    <label class="switch-row"><span>${t('add_ex_setting')}<small class="muted block-sm">${t('add_ex_setting_d')}</small></span><input type="checkbox" role="switch" data-addex ${st.settings.addExercise !== false ? 'checked' : ''}></label>
   </section>
 
   <section class="card" id="supplements">
@@ -116,6 +117,7 @@ export function renderMe(root) {
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
     toast(t('calendar_saved'));
   });
+  root.querySelector('[data-addex]').onchange = e => { store.update(s => { s.settings.addExercise = e.target.checked; }); toast(t('saved')); };
   root.querySelector('[data-lang]').onchange = e => { setLang(e.target.value); renderMe(root); };
   root.querySelector('[data-theme]').onchange = e => { store.update(s => { s.settings.theme = e.target.value; }); applyTheme(); };
   root.querySelector('[data-water]').onchange = e => { store.update(s => { s.settings.waterGoalMl = Math.max(500, num(e.target.value, 2000)); }); toast(t('saved')); };

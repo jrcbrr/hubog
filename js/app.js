@@ -34,6 +34,7 @@ function drawNav(active) {
     item('workouts') + item('me');
 }
 
+let lastRouteKey = null, enterTimer;
 function route() {
   const [path, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
   const params = new URLSearchParams(query);
@@ -50,6 +51,17 @@ function route() {
   drawNav(name === 'recipe' ? 'add' : name);
   try {
     routes[name](main, params);
+    // Animate in when you move to another screen (not when the same screen just refreshes)
+    const key = name + (params.get('date') || '');
+    if (key !== lastRouteKey) {
+      main.classList.remove('page-enter');
+      [...main.children].forEach((el, i) => el.style.setProperty('--i', Math.min(i, 8)));
+      void main.offsetWidth;
+      main.classList.add('page-enter');
+      clearTimeout(enterTimer);
+      enterTimer = setTimeout(() => main.classList.remove('page-enter'), 1400);
+    }
+    lastRouteKey = key;
   } catch (err) {
     console.error(err);
     main.innerHTML = `<div class="card"><h3>${t('error')}</h3><p class="muted small">${String(err.message || err)}</p><a class="btn" href="#/today">${t('today')}</a></div>`;
