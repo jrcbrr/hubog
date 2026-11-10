@@ -2,7 +2,7 @@
 import * as store from '../store.js';
 import { ACTIVITIES, activityById, estimateBurn, speedKmh, pace } from '../activities.js';
 import { t } from '../i18n.js';
-import { esc, sheet, toast, num, fmt, fmt1, burst } from '../ui.js';
+import { esc, sheet, toast, num, fmt, fmt1, burst, fresh, haptic } from '../ui.js';
 
 /** opts: { date, entry (to edit), prefill: { type, minutes, note }, onDone } */
 export function openActivitySheet({ date = store.todayKey(), entry = null, prefill = {}, onDone } = {}) {
@@ -79,9 +79,10 @@ export function openActivitySheet({ date = store.todayKey(), entry = null, prefi
       st.activities ||= {};
       const day = st.activities[date] ||= [];
       if (entry) Object.assign(day.find(x => x.id === entry.id) || {}, data);
-      else day.push({ id: store.uid(), time: Date.now(), ...data });
+      else { const id = store.uid(); fresh.id = id; day.push({ id, time: Date.now(), ...data }); }
     });
     s.close();
+    haptic(18);
     toast(t('activity_saved', { n: fmt(data.kcal) }));
     onDone?.();
     if (!entry) setTimeout(() => burst(document.querySelector('.exercise-card .meal-head .em') || document.querySelector('.cardio-cta'), '🔥', 7), 120);

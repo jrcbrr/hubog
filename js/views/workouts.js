@@ -94,7 +94,7 @@ function renderSession(root) {
   root.innerHTML = `
   <header class="page-head session-head"><div><h2>${esc(ses.dayName)}</h2><small class="muted" data-elapsed>${elapsed()}</small></div>
     <button class="btn sm" data-finish>${t('finish')}</button></header>
-  <div class="rest-bar" data-rest hidden><span>${t('rest')}</span><b data-rest-t>0:00</b>
+  <div class="rest-bar" data-rest hidden><i class="rest-fill" data-rest-fill></i><span>${t('rest')}</span><b data-rest-t>0:00</b>
     <button class="btn sm ghost" data-rest-add>+15s</button><button class="btn sm ghost" data-rest-skip>${t('skip')}</button></div>
   ${ses.exercises.map((e, ei) => `<section class="card exercise">
     <div class="row between"><h3>${esc(e.name)}</h3><button class="icon-btn" data-tip="${ei}" aria-label="${t('how_to')}">?</button></div>
@@ -168,7 +168,7 @@ function renderSession(root) {
 }
 
 function startRest(root, seconds) {
-  restTimer = { end: Date.now() + seconds * 1000, id: null };
+  restTimer = { end: Date.now() + seconds * 1000, total: seconds * 1000, id: null };
   bindRestBar(root);
 }
 function stopRest(root) {
@@ -186,6 +186,8 @@ function bindRestBar(root) {
     if (bar) {
       bar.hidden = false;
       bar.querySelector('[data-rest-t]').textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      const fill = bar.querySelector('[data-rest-fill]');
+      if (fill) fill.style.transform = `scaleX(${Math.min(1, 1 - (restTimer.end - Date.now()) / restTimer.total)})`;
     }
     if (left <= 0) { navigator.vibrate?.([200, 100, 200]); stopRest(document); }
   };
@@ -193,7 +195,7 @@ function bindRestBar(root) {
   tick();
   const bar = root.querySelector('[data-rest]');
   if (!bar) return;
-  bar.querySelector('[data-rest-add]').onclick = () => { if (restTimer) restTimer.end += 15000; tick(); };
+  bar.querySelector('[data-rest-add]').onclick = () => { if (restTimer) { restTimer.end += 15000; restTimer.total += 15000; } tick(); };
   bar.querySelector('[data-rest-skip]').onclick = () => stopRest(root);
 }
 

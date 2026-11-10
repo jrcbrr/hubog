@@ -9,7 +9,7 @@ import { foodEmoji } from '../foods.js';
 import { ICON, MEAL_EMOJI } from '../icons.js';
 import { activityById, burnedOn, effectiveGoal } from '../activities.js';
 import { openActivitySheet } from './activitysheet.js';
-import { playCounts, playRings, burst } from '../ui.js';
+import { playCounts, playRings, burst, fresh, haptic } from '../ui.js';
 
 // What the hero showed last time, so numbers and the ring animate from there instead of from zero
 let last = null;
@@ -43,7 +43,7 @@ export function renderToday(root, params) {
     const mt = sumEntries(items);
     return `<div class="card meal">
       <div class="meal-head"><span class="em" aria-hidden="true">${MEAL_EMOJI[m]}</span><h3>${t(m)}</h3>${items.length ? `<span class="num">${fmt(mt.kcal)} kcal</span>` : ''}</div>
-      ${items.map(e => `<button class="entry" data-entry="${e.id}">
+      ${items.map(e => `<button class="entry ${fresh.id === e.id ? 'fresh' : ''}" data-entry="${e.id}">
           <span class="tile" aria-hidden="true">${foodEmoji(e)}</span>
           <span class="grow"><b>${esc(e.name)}</b><small class="muted">${fmt1(e.qty)} × ${esc(e.serving || '')}</small></span>
           <span class="kcal">${fmt(e.kcal * e.qty)}</span></button>`).join('')}
@@ -83,7 +83,7 @@ export function renderToday(root, params) {
   </div>` : ''}
 
   <section class="card water">
-    <span class="water-icon">${ICON.drop}</span>
+    <span class="water-icon" style="--lvl:${Math.min(1, water / wGoal)}"><span class="water-fill" aria-hidden="true"></span>${ICON.drop}</span>
     <div><h3>${t('water')}</h3><span class="muted">${fmt(water)} / ${fmt(wGoal)} ml</span></div>
     <div class="water-btns">
       <button class="btn sm" data-water="-250" ${water ? '' : 'disabled'} aria-label="−250 ml">−</button>
@@ -97,7 +97,7 @@ export function renderToday(root, params) {
     ${acts.map(a => {
       const def = activityById(a.type);
       const bits = [`${a.minutes} min`, a.km ? `${fmt1(a.km)} km` : '', a.note ? esc(a.note) : ''].filter(Boolean).join(', ');
-      return `<button class="entry" data-act="${a.id}">
+      return `<button class="entry ${fresh.id === a.id ? 'fresh' : ''}" data-act="${a.id}">
         <span class="tile act-tile" aria-hidden="true">${def.emoji}</span>
         <span class="grow"><b>${t('act_t_' + def.id)}</b><small class="muted">${bits}</small></span>
         <span class="kcal burn">${a.estimated ? '<small>≈ </small>' : ''}${fmt(a.kcal)}</span></button>`;
@@ -122,6 +122,7 @@ export function renderToday(root, params) {
 
   playRings(root);
   playCounts(root);
+  fresh.id = null;
   root.querySelector('[data-add-act]').onclick = () => openActivitySheet({ date, onDone: () => renderToday(root, params) });
   root.querySelectorAll('[data-act]').forEach(b => b.onclick = () => {
     openActivitySheet({ date, entry: acts.find(a => a.id === b.dataset.act), onDone: () => renderToday(root, params) });
@@ -139,12 +140,14 @@ export function renderToday(root, params) {
   root.querySelector('[data-creatine]')?.addEventListener('click', () => {
     const was = takenOn(date);
     toggleTaken(date);
+    haptic();
     if (!was) toast(t('creatine_logged'));
     renderToday(root, params);
     if (!was) { root.querySelector('.supp-icon')?.classList.add('just'); burst(root.querySelector('.supp-icon'), '✨', 6); }
   });
   root.querySelectorAll('[data-water]').forEach(b => b.onclick = () => {
     const before = water;
+    haptic();
     store.update(s => { s.water[date] = Math.max(0, (s.water[date] || 0) + Number(b.dataset.water)); });
     const reached = before < wGoal && store.get().water[date] >= wGoal;
     if (reached) toast(t('water_done'));

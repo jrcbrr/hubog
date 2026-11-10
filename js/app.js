@@ -6,6 +6,7 @@ import { requestPersistentStorage } from './backup.js';
 import { ICON } from './icons.js';
 import { startReminderLoop } from './creatine.js';
 import { renderOnboarding } from './views/onboarding.js';
+import { initRipples } from './ui.js';
 import { renderToday } from './views/today.js';
 import { renderAdd } from './views/add.js';
 import { renderRecipe } from './views/recipe.js';
@@ -26,12 +27,24 @@ const routes = {
   profile: root => renderOnboarding(root, { editing: true }),
 };
 
+let navX = null;
 function drawNav(active) {
   const item = r =>
     `<a href="#/${r}" class="${active === r ? 'on' : ''}" ${active === r ? 'aria-current="page"' : ''}>${ICON[r]}<span>${t(r)}</span></a>`;
-  nav.innerHTML = item('today') + item('progress') +
+  nav.innerHTML = `<span class="nav-pill" aria-hidden="true"></span>` + item('today') + item('progress') +
     `<a href="#/add" class="nav-add" aria-label="${t('add_food')}"><span>${ICON.plus}</span></a>` +
     item('workouts') + item('me');
+  // Slide the highlight from the previous tab to the new one
+  const pill = nav.querySelector('.nav-pill'), on = nav.querySelector('a.on');
+  if (!on) { pill.style.opacity = 0; return; }
+  const x = on.offsetLeft + on.offsetWidth / 2;
+  pill.style.transition = 'none';
+  pill.style.transform = `translateX(${(navX ?? x)}px) translateX(-50%)`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    pill.style.transition = '';
+    pill.style.transform = `translateX(${x}px) translateX(-50%)`;
+  }));
+  navX = x;
 }
 
 let lastRouteKey = null, enterTimer;
@@ -71,6 +84,7 @@ function route() {
 
 initLang();
 applyTheme();
+initRipples();
 requestPersistentStorage();
 window.addEventListener('hashchange', route);
 window.addEventListener('hubog:lang', route);

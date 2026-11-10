@@ -4,6 +4,7 @@ import { t, dateLabel, shortDay } from '../i18n.js';
 import { esc, lineChart, barChart, fmt, fmt1, sheet, toast, num } from '../ui.js';
 import { getTargets } from './today.js';
 import { burnedOn } from '../activities.js';
+import { ICON } from '../icons.js';
 
 let range = 7;
 
@@ -30,12 +31,12 @@ export function renderProgress(root) {
     <div class="seg">${[7, 30].map(r => `<button class="${range === r ? 'on' : ''}" data-range="${r}">${r}${t('d')}</button>`).join('')}</div></header>
 
   <div class="stats">
-    <div class="stat hot"><b>${strk}</b><small>${t('day_streak')}</small></div>
+    <div class="stat hot"><b>${ICON.flame}${strk}</b><small>${t('day_streak')}</small></div>
     <div class="stat"><b>${logged.length}/${range}</b><small>${t('days_logged')}</small></div>
     <div class="stat"><b>${onTarget}</b><small>${t('days_on_target')}</small></div>
     <div class="stat"><b>${workouts}</b><small>${t('workouts')}</small></div>
-    <div class="stat burn-stat"><b>${fmt(burnedTotal)}</b><small>${t('kcal_burned_n', { n: activeDays })}</small></div>
     <div class="stat"><b>${waterDays}</b><small>${t('water_goal_days')}</small></div>
+    <div class="stat burn-stat"><b>${fmt(burnedTotal)}</b><small>${t('kcal_burned_n', { n: activeDays })}</small></div>
     <div class="stat"><b>${latest ? fmt1(bmi(latest.kg, st.profile.heightCm)) : '–'}</b><small>BMI</small></div>
   </div>
 

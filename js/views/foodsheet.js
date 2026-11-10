@@ -1,7 +1,7 @@
 // Bottom sheet for adding a food to the log, or editing an existing log entry.
 import * as store from '../store.js';
 import { t } from '../i18n.js';
-import { esc, sheet, toast, num, fmt, fmt1 } from '../ui.js';
+import { esc, sheet, toast, num, fmt, fmt1, fresh, haptic } from '../ui.js';
 import { foodEmoji } from '../foods.js';
 import { ICON } from '../icons.js';
 
@@ -109,13 +109,14 @@ export function openFoodSheet(food, { date = store.todayKey(), meal = defaultMea
     store.update(st => {
       const day = st.log[date] ||= [];
       if (entry) Object.assign(day.find(x => x.id === entry.id) || {}, data);
-      else day.push({ id: store.uid(), time: Date.now(), ...data });
+      else { const id = store.uid(); fresh.id = id; day.push({ id, time: Date.now(), ...data }); }
       if (food.id) {
         const snap = { ...food };
         st.recents = [snap, ...st.recents.filter(r => r.id !== food.id)].slice(0, 25);
       }
     });
     s.close();
+    haptic(18);
     toast(entry ? t('saved') : t('added'));
     onDone?.();
   };

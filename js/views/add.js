@@ -8,7 +8,7 @@ import { getTargets } from './today.js';
 import { searchOFF, lookupBarcode } from '../off.js';
 import { startBarcodeScan, readLabel } from '../scan.js';
 import { t } from '../i18n.js';
-import { esc, sheet, toast, num, fmt, fmt1 } from '../ui.js';
+import { esc, sheet, toast, num, fmt, fmt1, fresh } from '../ui.js';
 import { openFoodSheet, defaultMeal, MEALS } from './foodsheet.js';
 import { recipeAsFood } from './recipe.js';
 
@@ -94,7 +94,7 @@ export function renderAdd(root, params) {
         <p class="rest-note small muted">${t(r.items.some(i => i[6] === 'us') ? 'rest_note_mixed' : 'rest_note_est', { name: r.name })}</p>
         ${countLine(items.length)}${list(items, filtering() ? t('no_filter_match') : t('no_results'))}`;
       results.querySelectorAll('[data-rest]').forEach(b => b.onclick = e => {
-        e.stopPropagation(); restaurant = b.dataset.rest; draw();
+        e.stopPropagation(); restaurant = b.dataset.rest; draw(); results.classList.add('list-in'); setTimeout(() => results.classList.remove('list-in'), 900);
         results.querySelector('.rest-tab.on')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
       });
     } else if (tab === 'favorites') {
@@ -120,7 +120,7 @@ export function renderAdd(root, params) {
       clearTimeout(timer); ctrl?.abort();
       if (query.length >= 3) {
         if (!navigator.onLine) { online.innerHTML = `<p class="empty">${t('offline_search')}</p>`; return; }
-        online.innerHTML = `<h4 class="list-head">${t('packaged_foods')}</h4><p class="empty">${t('searching')}…</p>`;
+        online.innerHTML = `<h4 class="list-head">${t('packaged_foods')}</h4>` + '<div class="skeleton-row"><i></i><span><b></b><b></b></span></div>'.repeat(3) + `<span class="sr-only">${t('searching')}…</span>`;
         timer = setTimeout(async () => {
           ctrl = new AbortController();
           try {
@@ -148,12 +148,14 @@ export function renderAdd(root, params) {
     draw();
   });
   root.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; renderAdd(root, params); });
+  const stagger = () => { results.classList.remove('list-in'); void results.offsetWidth; results.classList.add('list-in'); setTimeout(() => results.classList.remove('list-in'), 900); };
   // handlers live on elements re-created each render, so they never stack up
   results.onclick = online.onclick = e => {
     const r = e.target.closest('.food-row');
     if (r && pool.has(r.dataset.id)) open(pool.get(r.dataset.id));
   };
   draw();
+  stagger();
 
   root.querySelector('[data-act="barcode"]').onclick = () => barcodeSheet(open);
   root.querySelector('[data-act="label"]').onclick = () => labelSheet(open);
@@ -308,8 +310,9 @@ function quickAddSheet(date, meal, after) {
     e.preventDefault();
     const f = new FormData(e.target);
     store.update(st => {
+      const id = store.uid(); fresh.id = id;
       (st.log[date] ||= []).push({
-        id: store.uid(), time: Date.now(), foodId: null, name: f.get('name').trim() || t('quick_add'), serving: t('quick_add'),
+        id, time: Date.now(), foodId: null, name: f.get('name').trim() || t('quick_add'), serving: t('quick_add'),
         kcal: num(f.get('kcal')), protein: num(f.get('protein')), carbs: num(f.get('carbs')), fat: num(f.get('fat')),
         qty: 1, meal: f.get('meal'),
       });
